@@ -21,7 +21,7 @@ public:
     ZGameTime m_tRealTime;
     ZGameTime m_tLastRealTime;
     ZGameTime m_tRealTimeDelta;
-    float m_fTimeMultiplier0;
+    float m_fTimeMultiplier0; // used by instinct etc.
     float m_fTimeMultiplier1;
     bool m_unk0x50;
     PAD(0x1F);

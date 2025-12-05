@@ -51,6 +51,7 @@ set(MODS
         OnlineTools
         Player
         Assets
+        TimeControl
 )
 
 foreach (MOD IN LISTS MODS)
