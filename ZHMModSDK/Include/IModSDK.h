@@ -231,6 +231,13 @@ public:
     virtual TEntityRef<ZHitman5> GetLocalPlayer() = 0;
 
     /**
+     * Try to get an entity in the currently active scene by its entity ID.
+     * @param p_EntityId The entity ID to search for.
+     * @return The entity reference, empty if not found.
+     */
+    virtual ZEntityRef GetEntityById(uint64_t p_EntityId) = 0;
+
+    /**
      * Search for a pattern in the game's memory and patch it with the given code, storing the original code in a provided buffer.
      * @param p_Pattern A sequence of bytes to search for in the game's memory.
      * @param p_Mask A mask to use when searching for the pattern. x = pattern byte, ? = any byte (eg. xxx????x).

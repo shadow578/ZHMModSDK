@@ -52,6 +52,7 @@ set(MODS
         Player
         Assets
         TimeControl
+        HUDControl
 )
 
 foreach (MOD IN LISTS MODS)

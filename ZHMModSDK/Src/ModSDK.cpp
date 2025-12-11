@@ -45,6 +45,7 @@
 #include <simdjson.h>
 #include <semver.hpp>
 #include <limits.h>
+#include <queue>
 
 #include <sentry.h>
 
@@ -1576,6 +1577,59 @@ TEntityRef<ZHitman5> ModSDK::GetLocalPlayer() {
     }
 
     return TEntityRef<ZHitman5>(s_PlayerData->m_Controller.m_HitmanEntity);
+}
+
+ZEntityRef ModSDK::GetEntityById(uint64_t p_EntityId)
+{
+    const auto s_SceneCtx = Globals::Hitman5Module->m_pEntitySceneContext;
+    if (!s_SceneCtx) {
+        return {};
+    }
+
+    std::queue<std::pair<ZEntityBlueprintFactoryBase*, ZEntityRef>> s_NodeQueue;
+    for (const auto& s_Brick : s_SceneCtx->m_aLoadedBricks) {
+        auto s_Entity = s_Brick.m_EntityRef;
+        if (!s_Entity) {
+            continue;
+        }
+
+        auto s_BpFactory = s_Entity.GetBlueprintFactory();
+        if (!s_BpFactory) {
+            continue;
+        }
+
+        s_NodeQueue.emplace(s_BpFactory, s_Entity);
+    }
+
+    while (!s_NodeQueue.empty()) {
+        auto [s_CurrentFactory, s_CurrentRoot] = s_NodeQueue.front();
+        s_NodeQueue.pop();
+
+        // go through each sub-entity
+        const auto s_SubEntityCount = s_CurrentFactory->GetSubEntitiesCount();
+        for (int i = 0; i < s_SubEntityCount; ++i)
+        {
+            const ZEntityRef s_SubEntity = s_CurrentFactory->GetSubEntity(s_CurrentRoot.m_pEntity, i);
+            const auto s_SubEntityFactory = s_CurrentFactory->GetSubEntityBlueprint(i);
+
+            if (!s_SubEntity.GetEntity() || !s_SubEntity->GetType()) {
+                continue;
+            }
+
+            // if the sub-entity has a factory with more sub-entities, add it to the queue.
+            if (s_SubEntityFactory && s_SubEntityFactory->GetSubEntitiesCount() > 0) {
+                s_NodeQueue.emplace(s_SubEntityFactory, s_SubEntity);
+            }
+
+            // check if this is the entity we're looking for.
+            const auto s_EntityId = s_SubEntity->GetType()->m_nEntityId;
+            if (s_EntityId == p_EntityId) {
+                return s_SubEntity;
+            }
+        }
+    }
+
+    return {};
 }
 
 bool ModSDK::CreateDDSTextureFromMemory(

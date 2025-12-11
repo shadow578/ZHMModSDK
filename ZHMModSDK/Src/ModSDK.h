@@ -176,6 +176,7 @@ public:
     void ReloadPluginSettings(IPluginInterface* p_Plugin) override;
 
     TEntityRef<ZHitman5> GetLocalPlayer() override;
+    ZEntityRef GetEntityById(uint64_t p_EntityId) override;
 
     bool CreateDDSTextureFromMemory(
         const void* p_Data,
