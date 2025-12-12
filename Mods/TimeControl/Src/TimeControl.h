@@ -20,7 +20,7 @@ public:
 private:
     void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent);
 
-    static float fClamp(float value, float min, float max)
+    static float Clampf(float value, float min, float max)
     {
         if (value < min)
             return min;
@@ -36,8 +36,8 @@ private:
     DECLARE_PLUGIN_DETOUR(TimeControl, void, OnClearScene, ZEntitySceneContext* th, bool p_FullyUnloadScene);
 
 private:
-    bool m_MenuActive;
-    float* m_fTimeScale;
+    bool m_bMenuActive;
+    bool m_bOverlayActive;
 
     float m_fMinTimeScale;
     float m_fMaxTimeScale;
