@@ -27,11 +27,11 @@ private:
     DECLARE_PLUGIN_DETOUR(HUDControl, void, OnClearScene, ZEntitySceneContext* th, bool p_FullyUnloadScene);
 
 private:
-    bool m_MenuActive;
+    bool m_bMenuActive;
 
-    bool m_HUDVisible;
-    float m_HUDAlpha;
-    bool m_MiniMapShowsNpcs;
+    bool m_bHUDVisible;
+    float m_fHUDAlpha;
+    bool m_bMiniMapShowsNpcs;
 
     ZEntityRef m_HUDRootEntity;
     ZEntityRef m_MinimapRootEntity;

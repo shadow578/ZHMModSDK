@@ -27,10 +27,10 @@ constexpr uint64_t HUD_MASTER_ROOT_ID = 0x77bed13890286553;
 constexpr uint64_t MINIMAP_ROOT_ID = 0xccda0a613b5d88cb;
 
 HUDControl::HUDControl() :
-    m_MenuActive(false),
-    m_HUDVisible(true),
-    m_HUDAlpha(1.0f),
-    m_MiniMapShowsNpcs(true)
+    m_bMenuActive(false),
+    m_bHUDVisible(true),
+    m_fHUDAlpha(1.0f),
+    m_bMiniMapShowsNpcs(true)
 {
 
 }
@@ -42,38 +42,38 @@ void HUDControl::Init()
 
 void HUDControl::OnDrawMenu()
 {
-    if (ImGui::Button(ICON_MD_TIMER " HUD"))
+    if (ImGui::Button(ICON_MD_DASHBOARD " HUD"))
     {
-        m_MenuActive = !m_MenuActive;
+        m_bMenuActive = !m_bMenuActive;
     }
 }
 
 void HUDControl::OnDrawUI(const bool p_HasFocus)
 {
-    if (!p_HasFocus || !m_MenuActive)
+    if (!p_HasFocus || !m_bMenuActive)
     {
         return;
     }
 
     ImGui::PushFont(SDK()->GetImGuiBlackFont());
-    const auto s_Showing = ImGui::Begin("HUD Control", &m_MenuActive);
+    const auto s_Showing = ImGui::Begin("HUD Control", &m_bMenuActive);
     ImGui::PushFont(SDK()->GetImGuiRegularFont());
 
     if (s_Showing)
     {
-        if (ImGui::Checkbox("HUD Visible", &m_HUDVisible))
+        if (ImGui::Checkbox("HUD Visible", &m_bHUDVisible))
         {
-            SetHUDVisibility(m_HUDVisible);
+            SetHUDVisibility(m_bHUDVisible);
         }
 
-        if (ImGui::SliderFloat("HUD Alpha", &m_HUDAlpha, 0.0f, 1.0f))
+        if (ImGui::SliderFloat("HUD Alpha", &m_fHUDAlpha, 0.0f, 1.0f))
         {
-            SetHUDAlpha(m_HUDAlpha);
+            SetHUDAlpha(m_fHUDAlpha);
         }
 
-        if (ImGui::Checkbox("Show NPCs on Minimap", &m_MiniMapShowsNpcs))
+        if (ImGui::Checkbox("Show NPCs on Minimap", &m_bMiniMapShowsNpcs))
         {
-            SetMiniMapShowsNpcs(m_MiniMapShowsNpcs);
+            SetMiniMapShowsNpcs(m_bMiniMapShowsNpcs);
         }
     }
 

@@ -1581,6 +1581,10 @@ TEntityRef<ZHitman5> ModSDK::GetLocalPlayer() {
 
 ZEntityRef ModSDK::GetEntityById(uint64_t p_EntityId)
 {
+    if (!Globals::Hitman5Module) {
+        return {};
+    }
+
     const auto s_SceneCtx = Globals::Hitman5Module->m_pEntitySceneContext;
     if (!s_SceneCtx) {
         return {};
