@@ -53,6 +53,7 @@ set(MODS
         Assets
         TimeControl
         HUDControl
+        ChaosMod
 )
 
 foreach (MOD IN LISTS MODS)
