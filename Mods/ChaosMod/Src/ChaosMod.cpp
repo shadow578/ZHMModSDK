@@ -17,6 +17,9 @@
 
 #include "Effects/ZExplodeRandomActorEffect.h"
 #include "Effects/ZLagEffect.h"
+#include "Effects/ZPlayerPoweredRagdollEffect.h"
+#include "Effects/ZPlayerRagdollEffect.h"
+#include "Effects/ZPlayerRagdollImpulseEffect.h"
 #include "Effects/ZSlowTimeScaleEffect.h"
 #include "Effects/ZSwapPlayerWithActorEffect.h"
 #include "Effects/ZTeleportEffect.h"
@@ -33,6 +36,9 @@ ChaosMod::ChaosMod() : m_bMenuActive(false),
     m_aEffects = std::vector<IChaosEffect*>{
         new ZExplodeRandomActorEffect(),
         new ZLagEffect(),
+        new ZPlayerPoweredRagdollEffect(),
+        new ZPlayerRagdollEffect(),
+        new ZPlayerRagdollImpulseEffect(),
         new ZSlowTimeScaleEffect(),
         new ZSwapPlayerWithActorEffect(),
         new ZTeleportEffect(),
