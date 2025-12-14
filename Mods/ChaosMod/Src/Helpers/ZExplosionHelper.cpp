@@ -136,6 +136,7 @@ bool ZExplosionHelper::SpawnExplosionProp(ZEntityRef& p_RootEntityRef, ZEntityRe
     Logger::Debug(TAG "Spawned explosion entity successfully.");
 
     // "PropHelper_Explosive" does the explosion itself
+    // Hash 0xfeedfeedfeedfeec corresponds to the "feedfeedfeedfeec" entity in the JSON template
     if (const auto idx = s_PropRTBpFactory.GetResource()->GetSubEntityIndex(0xfeedfeedfeedfeec); idx != -1)
     {
         if (const auto s_Ent = s_PropRTBpFactory.GetResource()->GetSubEntity(p_RootEntityRef.m_pEntity, idx))
@@ -145,6 +146,7 @@ bool ZExplosionHelper::SpawnExplosionProp(ZEntityRef& p_RootEntityRef, ZEntityRe
     }
 
     // "TimerRandom" acts as the trigger
+    // Hash 0xfeedfeedfeedfee0 corresponds to the "feedfeedfeedfee0" entity in the JSON template
     if (const auto idx = s_PropRTBpFactory.GetResource()->GetSubEntityIndex(0xfeedfeedfeedfee0); idx != -1)
     {
         if (const auto s_Ent = s_PropRTBpFactory.GetResource()->GetSubEntity(p_RootEntityRef.m_pEntity, idx))

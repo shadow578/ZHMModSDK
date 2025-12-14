@@ -1,19 +1,33 @@
 #include "ZFakeCrashEffect.h"
 
+#ifdef _WIN32
 #include <vector>
 #include <Windows.h>
 #include <TlHelp32.h>
 
 constexpr DWORD c_THREAD_SUSPEND_MILLIS = 10000; // 10 seconds
+#endif
+
+bool ZFakeCrashEffect::Available()
+{
+#ifdef _WIN32
+    return true;
+#else
+    return false;
+#endif
+}
 
 void ZFakeCrashEffect::Start()
 {
+#ifdef _WIN32
     SuspendAllThreads();
+#endif
 }
 
 // based on https://github.com/gta-chaos-mod/ChaosModV/blob/master/ChaosMod/Effects/db/Misc/MiscFakeCrash.cpp
 void ZFakeCrashEffect::SuspendAllThreads()
 {
+#ifdef _WIN32
     std::vector<HANDLE> s_vThreadHandles;
 
     HANDLE s_hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
@@ -57,4 +71,5 @@ void ZFakeCrashEffect::SuspendAllThreads()
     }
 
     CloseHandle(s_hSnapshot);
+#endif
 }

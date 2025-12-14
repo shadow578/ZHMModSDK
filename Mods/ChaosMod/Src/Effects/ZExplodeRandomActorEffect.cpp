@@ -31,12 +31,12 @@ void ZExplodeRandomActorEffect::Start()
     // offset a bit upwards so it doesn't clip into the ground
     s_ActorPos.Trans.z += 0.25f;
 
-    // FIXME: yes, this leaks memory. no, i don't care.
-    auto s_Explosion = new ZExplosionHelper();
-    s_Explosion->SetPosition(s_ActorPos);
-    s_Explosion->SetDeathContext(EDeathContext::eDC_ACCIDENT);
-    s_Explosion->SetDeathType(EDeathType::eDT_BLOODY_KILL);
-    s_Explosion->Trigger();
+    // Create explosion helper on stack to avoid memory leak
+    ZExplosionHelper s_Explosion;
+    s_Explosion.SetPosition(s_ActorPos);
+    s_Explosion.SetDeathContext(EDeathContext::eDC_ACCIDENT);
+    s_Explosion.SetDeathType(EDeathType::eDT_BLOODY_KILL);
+    s_Explosion.Trigger();
 
     Logger::Info(TAG "Actor '{}' goes boom!", s_Actor->m_sActorName);
     m_pLastTarget = s_Actor;
