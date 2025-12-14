@@ -1,16 +1,15 @@
 #pragma once
 
-#include "IChaosModule.h"
+#include "IChaosEffect.h"
 
 #include "Glacier/ZMath.h"
 
-class ZExplodeRandomActorModule : public IChaosModule
+class ZExplodeRandomActorEffect : public IChaosEffect
 {
     void OnEngineInitialized() override;
-    void Trigger() override;
-    std::string GetName() override;
-
     void OnDrawDebugUI() override;
+
+    void Start() override;
 
 private:
     ZActor* m_pLastTarget = nullptr;

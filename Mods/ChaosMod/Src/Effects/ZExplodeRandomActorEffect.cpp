@@ -1,4 +1,4 @@
-#include "ZExplodeRandomActorModule.h"
+#include "ZExplodeRandomActorEffect.h"
 
 #include "Glacier/ZMath.h"
 #include "Glacier/ZSpatialEntity.h"
@@ -6,16 +6,16 @@
 #include "Helpers/Utils.h"
 #include "Helpers/ZExplosionHelper.h"
 
-#define TAG "[ZExplodeRandomActorModule] "
+#define TAG "[ZExplodeRandomActorEffect] "
 
-void ZExplodeRandomActorModule::OnEngineInitialized()
+void ZExplodeRandomActorEffect::OnEngineInitialized()
 {
-    ZExplosionHelper::PreloadResources();
+    m_bIsAvailable = ZExplosionHelper::PreloadResources();
 }
 
-void ZExplodeRandomActorModule::Trigger()
+void ZExplodeRandomActorEffect::Start()
 {
-    ZActor* s_Actor = GetRandomActor(true);
+    ZActor* s_Actor = Utils::GetRandomActor(true);
     if (!s_Actor)
     {
         Logger::Warn(TAG "No actor found to explode!");
@@ -28,10 +28,10 @@ void ZExplodeRandomActorModule::Trigger()
     ZSpatialEntity* s_ActorSpatialEntity = s_EntityRef.QueryInterface<ZSpatialEntity>();
     auto s_ActorPos = s_ActorSpatialEntity->GetWorldMatrix();
 
-    // offset a bit upwards so the it doesn't clip into the ground
+    // offset a bit upwards so it doesn't clip into the ground
     s_ActorPos.Trans.z += 0.25f;
 
-    // yes, this leaks memory. no, i don't care.
+    // FIXME: yes, this leaks memory. no, i don't care.
     auto s_Explosion = new ZExplosionHelper();
     s_Explosion->SetPosition(s_ActorPos);
     s_Explosion->SetDeathContext(EDeathContext::eDC_ACCIDENT);
@@ -43,12 +43,7 @@ void ZExplodeRandomActorModule::Trigger()
     m_LastTargetPos = s_ActorPos;
 }
 
-std::string ZExplodeRandomActorModule::GetName()
-{
-    return "ZExplodeRandomActor";
-}
-
-void ZExplodeRandomActorModule::OnDrawDebugUI()
+void ZExplodeRandomActorEffect::OnDrawDebugUI()
 {
     std::string s_LastTargetName = "<null>";
     if (m_pLastTarget)
@@ -60,18 +55,6 @@ void ZExplodeRandomActorModule::OnDrawDebugUI()
 
     if (ImGui::Button("Teleport to last target site"))
     {
-        auto s_Player = SDK()->GetLocalPlayer();
-        if (!s_Player.m_ref)
-        {
-            return;
-        }
-
-        auto s_PlayerSpartialEntity = s_Player.m_ref.QueryInterface<ZSpatialEntity>();
-        if (!s_PlayerSpartialEntity)
-        {
-            return;
-        }
-
-        s_PlayerSpartialEntity->SetWorldMatrix(m_LastTargetPos);
+        Utils::TeleportPlayerTo(m_LastTargetPos);
     }
 }

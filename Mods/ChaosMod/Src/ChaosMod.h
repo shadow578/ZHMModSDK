@@ -5,7 +5,7 @@
 #include <Glacier/ZScene.h>
 
 #include "Helpers/ZTimer.h"
-#include "Modules/IChaosModule.h"
+#include "IChaosEffect.h"
 
 #include <vector>
 
@@ -30,13 +30,15 @@ private:
 
 private:
     bool m_bMenuActive;
+
+    std::vector<IChaosEffect*> m_aEffects;
+
+    ZTimer m_EffectTimer;
+    IChaosEffect* m_pLastEffect;
+
+    // debug
     bool m_bDebugMenuActive;
-
-    std::vector<IChaosModule*> m_aChaosModules;
-    IChaosModule* m_pDebugSelectedModule;
-
-    ZTimer m_ChaosTriggerTimer;
-    IChaosModule* m_pLastTriggeredModule;
+    IChaosEffect* m_pEffectForDebug;
 };
 
 DECLARE_ZHM_PLUGIN(ChaosMod)

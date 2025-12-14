@@ -173,7 +173,7 @@ bool ZExplosionHelper::GetExplosionPropFactory(TResourcePtr<ZTemplateEntityFacto
 	"entities": {
 		"feedfeedfeedfeed": {
 			"parent": null,
-			"name": "ZExplosionHeler_ROOT",
+			"name": "ZExplosionHelper_ROOT",
 			"factory": "[modules:/zspatialentity.class].pc_entitytype",
 			"blueprint": "[modules:/zspatialentity.class].pc_entityblueprint"
 		},

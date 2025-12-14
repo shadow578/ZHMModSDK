@@ -13,36 +13,34 @@
 #include "Helpers/ZTimer.h"
 #include "Helpers/Utils.h"
 
-#include "Modules/ZExplodeRandomActorModule.h"
-#include "Modules/ZSwapPlayerWithActorModule.h"
-#include "Modules/ZTeleportUp.h"
+#include "Effects/ZExplodeRandomActorEffect.h"
+#include "Effects/ZSwapPlayerWithActorEffect.h"
+#include "Effects/ZTeleportEffect.h"
 
 #include <array>
 
 #define TAG "[ChaosMod] "
 
-ChaosMod::ChaosMod() :
-    m_bMenuActive(false),
-    m_bDebugMenuActive(false),
-    m_pDebugSelectedModule(nullptr),
-    m_pLastTriggeredModule(nullptr),
-    m_ChaosTriggerTimer(std::bind(&ChaosMod::TriggerRandomChaosModule, this), 30.0
-    )
+ChaosMod::ChaosMod() : m_bMenuActive(false),
+                       m_bDebugMenuActive(false),
+                       m_pEffectForDebug(nullptr),
+                       m_pLastEffect(nullptr),
+                       m_EffectTimer(std::bind(&ChaosMod::TriggerRandomChaosModule, this), 30.0)
 {
-    m_aChaosModules = std::vector<IChaosModule*>{    
-        new ZExplodeRandomActorModule(),
-        new ZSwapPlayerWithActorModule(),
-        new ZTeleportUpModule(),
+    m_aEffects = std::vector<IChaosEffect *>{
+        new ZExplodeRandomActorEffect(),
+        new ZSwapPlayerWithActorEffect(),
+        new ZTeleportEffect(),
     };
 }
 
 ChaosMod::~ChaosMod()
 {
-    for (auto* module : m_aChaosModules)
+    for (auto *s_pEffect : m_aEffects)
     {
-        delete module;
+        delete s_pEffect;
     }
-    m_aChaosModules.clear();
+    m_aEffects.clear();
 }
 
 void ChaosMod::Init()
@@ -50,40 +48,47 @@ void ChaosMod::Init()
     Hooks::ZEntitySceneContext_LoadScene->AddDetour(this, &ChaosMod::OnLoadScene);
     Hooks::ZEntitySceneContext_ClearScene->AddDetour(this, &ChaosMod::OnClearScene);
 
-    for (auto s_Module : m_aChaosModules)
+    for (auto *s_pEffect : m_aEffects)
     {
-        if (s_Module)
+        if (s_pEffect && s_pEffect->Available())
         {
-            Logger::Debug(TAG "Forwarding OnModInitialized to '{}'", s_Module->GetName());
-            s_Module->OnModInitialized();
+            Logger::Debug(TAG "Forwarding OnModInitialized to '{}'", s_pEffect->GetName());
+            s_pEffect->OnModInitialized();
         }
     }
 }
 
 void ChaosMod::OnEngineInitialized()
 {
-    m_ChaosTriggerTimer.Initialize();
+    m_EffectTimer.Initialize();
 
-    const ZMemberDelegate<ChaosMod, void(const SGameUpdateEvent&)> s_Delegate(this, &ChaosMod::OnFrameUpdate);
+    const ZMemberDelegate<ChaosMod, void(const SGameUpdateEvent &)> s_Delegate(this, &ChaosMod::OnFrameUpdate);
     Globals::GameLoopManager->RegisterFrameUpdate(s_Delegate, 1, EUpdateMode::eUpdatePlayMode);
 
-    for (auto s_Module : m_aChaosModules)
+    for (auto *s_pEffect : m_aEffects)
     {
-        if (s_Module)
+        if (s_pEffect && s_pEffect->Available())
         {
-            Logger::Debug(TAG "Forwarding OnEngineInitialized to '{}'", s_Module->GetName());
-            s_Module->OnEngineInitialized();
+            Logger::Debug(TAG "Forwarding OnEngineInitialized to '{}'", s_pEffect->GetName());
+            s_pEffect->OnEngineInitialized();
+
+            if (!s_pEffect->Available())
+            {
+                Logger::Warn(
+                    TAG "'{}' reported as unavailable during OnEngineInitialized, it will not be used.",
+                    s_pEffect->GetName());
+            }
         }
     }
 }
 
-void ChaosMod::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
+void ChaosMod::OnFrameUpdate(const SGameUpdateEvent &p_UpdateEvent)
 {
-    for (auto s_Module : m_aChaosModules)
+    for (auto *s_pEffect : m_aEffects)
     {
-        if (s_Module)
+        if (s_pEffect && s_pEffect->Available())
         {
-            s_Module->OnFrameUpdate(p_UpdateEvent);
+            s_pEffect->OnFrameUpdate(p_UpdateEvent);
         }
     }
 }
@@ -98,11 +103,11 @@ void ChaosMod::OnDrawMenu()
 
 void ChaosMod::OnDrawUI(const bool p_HasFocus)
 {
-    for (auto s_Module : m_aChaosModules)
+    for (auto *s_pEffect : m_aEffects)
     {
-        if (s_Module)
+        if (s_pEffect && s_pEffect->Available())
         {
-            s_Module->OnDrawUI(p_HasFocus);
+            s_pEffect->OnDrawUI(p_HasFocus);
         }
     }
 
@@ -118,14 +123,13 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
     if (s_Showing)
     {
         // this is shown even without focus to give feedback on the timer
-        float32 s_Elapsed = m_ChaosTriggerTimer.GetElapsedSeconds();
+        float32 s_Elapsed = m_EffectTimer.GetElapsedSeconds();
         ImGui::SliderFloat(
             "Chaos Timer",
             &s_Elapsed,
             0.0,
-            m_ChaosTriggerTimer.m_fIntervalSeconds
-        );
-        ImGui::TextUnformatted(fmt::format("Last Triggered: {}", m_pLastTriggeredModule ? m_pLastTriggeredModule->GetName() : "<null>").c_str());
+            m_EffectTimer.m_fIntervalSeconds);
+        ImGui::TextUnformatted(fmt::format("Last Triggered: {}", m_pLastEffect ? m_pLastEffect->GetName() : "<null>").c_str());
 
         if (!p_HasFocus)
         {
@@ -134,18 +138,17 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
             ImGui::PopFont();
             return;
         }
-        
+
         ImGui::Separator();
 
-        ImGui::Checkbox("Enable Chaos", &m_ChaosTriggerTimer.m_bEnable);
+        ImGui::Checkbox("Enable Chaos", &m_EffectTimer.m_bEnable);
         ImGui::SliderFloat(
             "Chaos Interval (Seconds)",
-            &m_ChaosTriggerTimer.m_fIntervalSeconds,
+            &m_EffectTimer.m_fIntervalSeconds,
             5.0,
-            120.0
-        );
+            120.0);
         ImGui::Checkbox("Show Debug Menu", &m_bDebugMenuActive);
-        ImGui::TextUnformatted(fmt::format("Modules Loaded: {}", m_aChaosModules.size()).c_str());
+        ImGui::TextUnformatted(fmt::format("Effects Loaded: {}", m_aEffects.size()).c_str());
     }
 
     ImGui::PopFont();
@@ -165,24 +168,23 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
     {
         ImGui::BeginChild("chaos left pane", ImVec2(300, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
 
-        for (auto s_Module : m_aChaosModules)
+        for (auto *s_pEffect : m_aEffects)
         {
-            if (s_Module)
+            if (s_pEffect)
             {
                 if (ImGui::Selectable(
-                    s_Module->GetName().c_str(),
-                    m_pDebugSelectedModule == s_Module
-                ))
+                        s_pEffect->GetName().c_str(),
+                        m_pEffectForDebug == s_pEffect))
                 {
-                    m_pDebugSelectedModule = s_Module;
-                    Logger::Debug(TAG "Selected '{}' for debug", s_Module->GetName());
+                    m_pEffectForDebug = s_pEffect;
+                    Logger::Debug(TAG "Selected '{}' for debug", s_pEffect->GetName());
                 }
             }
         }
 
         ImGui::EndChild();
 
-        if (!m_pDebugSelectedModule)
+        if (!m_pEffectForDebug)
         {
             ImGui::PopFont();
             ImGui::End();
@@ -193,22 +195,32 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
         ImGui::SameLine();
         ImGui::BeginGroup();
         ImGui::BeginChild("module debug view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
-        
-        if (ImGui::Button("Trigger Now"))
+
+        ImGui::TextUnformatted(fmt::format("Internal Name: {}", m_pEffectForDebug->GetName()).c_str());
+        ImGui::TextUnformatted(fmt::format("Display Name:  {}", m_pEffectForDebug->GetDisplayName()).c_str());
+
+        if (m_pEffectForDebug->Available())
         {
-            Logger::Info(TAG "Manually triggering '{}'", m_pDebugSelectedModule->GetName());
-            m_pDebugSelectedModule->Trigger();
-        }
+            if (ImGui::Button("Start() now"))
+            {
+                Logger::Info(TAG "Calling Start() for '{}'", m_pEffectForDebug->GetName());
+                m_pEffectForDebug->Start();
+            }
 
-        if (ImGui::Button("Signal Next Triggered"))
+            if (ImGui::Button("Stop() now"))
+            {
+                Logger::Info(TAG "Calling Stop() for '{}'", m_pEffectForDebug->GetName());
+                m_pEffectForDebug->Stop();
+            }
+
+            ImGui::Separator();
+
+            m_pEffectForDebug->OnDrawDebugUI();
+        }
+        else
         {
-            Logger::Info(TAG "Signaling OnNextTriggered to '{}'", m_pDebugSelectedModule->GetName());
-            m_pDebugSelectedModule->OnNextTriggered();
+            ImGui::TextUnformatted("This effect reports as unavailable.");
         }
-
-        ImGui::Separator();
-
-        m_pDebugSelectedModule->OnDrawDebugUI();
 
         ImGui::EndChild();
         ImGui::EndGroup();
@@ -221,42 +233,47 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
 
 void ChaosMod::TriggerRandomChaosModule()
 {
-    // notify previous module the next will be triggered now
-    // so that it can stop any ongoing effects if needed
-    if (m_pLastTriggeredModule)
+    // stop previous effect
+    if (m_pLastEffect)
     {
-        m_pLastTriggeredModule->OnNextTriggered();
+        m_pLastEffect->Stop();
     }
 
-    // trigger the next module
-    if (m_aChaosModules.size() == 0)
+    // get and trigger the next effect
+    if (m_aEffects.size() == 0)
     {
-        Logger::Error(TAG "No chaos modules loaded to trigger.");
-        return;
-    }
-    
-    const size_t s_ModuleIndex = GetRandomNumber<size_t>(0, m_aChaosModules.size());
-    const auto s_Module = m_aChaosModules[rand() % m_aChaosModules.size()];
-    if (!s_Module)
-    {
+        Logger::Error(TAG "No effects loaded to trigger.");
         return;
     }
 
-    Logger::Info(TAG "Triggering '{}'", s_Module->GetName());
-    s_Module->Trigger();
+    for (int t = 0; t < 10; t++)
+    {
+        const size_t s_nEffectIndex = Utils::GetRandomNumber<size_t>(0, m_aEffects.size() - 1);
+        m_pLastEffect = m_aEffects[s_nEffectIndex];
+        if (m_pLastEffect && m_pLastEffect->Available())
+        {
+            break;
+        }
+    }
 
-    m_pLastTriggeredModule = s_Module;
+    if (!m_pLastEffect)
+    {
+        return;
+    }
+
+    Logger::Info(TAG "Triggering '{}'", m_pLastEffect->GetName());
+    m_pLastEffect->Start();
 }
 
-DEFINE_PLUGIN_DETOUR(ChaosMod, void, OnLoadScene, ZEntitySceneContext* th, SSceneInitParameters&)
+DEFINE_PLUGIN_DETOUR(ChaosMod, void, OnLoadScene, ZEntitySceneContext *th, SSceneInitParameters &)
 {
-    m_ChaosTriggerTimer.m_bEnable = false;
+    m_EffectTimer.m_bEnable = false;
     return HookResult<void>(HookAction::Continue());
 }
 
-DEFINE_PLUGIN_DETOUR(ChaosMod, void, OnClearScene, ZEntitySceneContext* th, bool p_FullyUnloadScene)
+DEFINE_PLUGIN_DETOUR(ChaosMod, void, OnClearScene, ZEntitySceneContext *th, bool p_FullyUnloadScene)
 {
-    m_ChaosTriggerTimer.m_bEnable = false;
+    m_EffectTimer.m_bEnable = false;
     return HookResult<void>(HookAction::Continue());
 }
 
