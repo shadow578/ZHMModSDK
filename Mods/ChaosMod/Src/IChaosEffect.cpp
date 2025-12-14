@@ -4,7 +4,14 @@
 
 std::string IChaosEffect::GetName()
 {
-    return typeid(*this).name();
+    std::string s_Name = typeid(*this).name();
+
+    if (s_Name.find("class ") != std::string::npos)
+    {
+        s_Name.erase(0, 6 /* "class ".length() */);
+    }
+
+    return s_Name;
 }
 
 std::string IChaosEffect::GetDisplayName()
