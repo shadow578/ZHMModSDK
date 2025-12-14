@@ -10,6 +10,11 @@ class ZSwapPlayerWithActorEffect : public IChaosEffect
 
     void Start() override;
 
+    std::string GetDisplayName() override
+    {
+        return "Swap Player with Random Actor";
+    }
+
 private:
     SMatrix m_PreviousPlayerPosition;
 };

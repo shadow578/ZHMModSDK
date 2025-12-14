@@ -9,6 +9,11 @@ class ZTeleportEffect : public IChaosEffect
     void OnDrawDebugUI() override;
     void Start() override;
 
+    std::string GetDisplayName() override
+    {
+        return "Teleport Player";
+    }
+
 private:
     enum class ETeleportDirection
     {

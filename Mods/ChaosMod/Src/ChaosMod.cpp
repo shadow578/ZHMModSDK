@@ -13,11 +13,14 @@
 #include "Helpers/ZTimer.h"
 #include "Helpers/Utils.h"
 
+#include <array>
+
 #include "Effects/ZExplodeRandomActorEffect.h"
+#include "Effects/ZLagEffect.h"
+#include "Effects/ZSlowTimeScaleEffect.h"
 #include "Effects/ZSwapPlayerWithActorEffect.h"
 #include "Effects/ZTeleportEffect.h"
 
-#include <array>
 
 #define TAG "[ChaosMod] "
 
@@ -27,8 +30,10 @@ ChaosMod::ChaosMod() : m_bMenuActive(false),
                        m_pLastEffect(nullptr),
                        m_EffectTimer(std::bind(&ChaosMod::TriggerRandomChaosModule, this), 30.0)
 {
-    m_aEffects = std::vector<IChaosEffect *>{
+    m_aEffects = std::vector<IChaosEffect*>{
         new ZExplodeRandomActorEffect(),
+        new ZLagEffect(),
+        new ZSlowTimeScaleEffect(),
         new ZSwapPlayerWithActorEffect(),
         new ZTeleportEffect(),
     };
@@ -129,7 +134,7 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
             &s_Elapsed,
             0.0,
             m_EffectTimer.m_fIntervalSeconds);
-        ImGui::TextUnformatted(fmt::format("Last Triggered: {}", m_pLastEffect ? m_pLastEffect->GetName() : "<null>").c_str());
+        ImGui::TextUnformatted(fmt::format("Last Effect: {}", (m_pLastEffect != nullptr) ? m_pLastEffect->GetDisplayName() : "None").c_str());
 
         if (!p_HasFocus)
         {
