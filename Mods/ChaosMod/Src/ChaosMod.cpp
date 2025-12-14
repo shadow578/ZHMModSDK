@@ -16,6 +16,7 @@
 #include <array>
 
 #include "Effects/ZExplodeRandomActorEffect.h"
+#include "Effects/ZFakeCrashEffect.h"
 #include "Effects/ZLagEffect.h"
 #include "Effects/ZPlayerPoweredRagdollEffect.h"
 #include "Effects/ZPlayerRagdollEffect.h"
@@ -35,6 +36,7 @@ ChaosMod::ChaosMod() : m_bMenuActive(false),
 {
     m_aEffects = std::vector<IChaosEffect*>{
         new ZExplodeRandomActorEffect(),
+        new ZFakeCrashEffect(),
         new ZLagEffect(),
         new ZPlayerPoweredRagdollEffect(),
         new ZPlayerRagdollEffect(),
