@@ -6,6 +6,28 @@
 
 void ZTeleportEffect::Start()
 {
+    const ETeleportDirection s_eDirection = static_cast<ETeleportDirection>(
+        Utils::GetRandomNumber<int>(0, static_cast<int>(ETeleportDirection::NUMBER_OF_DIRECTIONS) - 1)
+        );
+
+    DoTeleport(s_eDirection);
+}
+
+void ZTeleportEffect::OnDrawDebugUI()
+{
+    if (ImGui::Button("Teleport Up"))
+    {
+        DoTeleport(ETeleportDirection::Up);
+    }
+
+    if (ImGui::Button("Teleport Forward"))
+    {
+        DoTeleport(ETeleportDirection::Forward);
+    }
+}
+
+void ZTeleportEffect::DoTeleport(const ETeleportDirection p_eDirection)
+{
     auto s_Player = SDK()->GetLocalPlayer();
     if (!s_Player.m_ref)
     {
@@ -18,9 +40,24 @@ void ZTeleportEffect::Start()
         return;
     }
 
-    auto s_Pos = s_PlayerSpatialEntity->GetWorldMatrix();
+    auto s_WM = s_PlayerSpatialEntity->GetWorldMatrix();
 
-    s_Pos.Trans.z += Utils::GetRandomNumber(1.0f, 100.0f);
+    switch (p_eDirection)
+    {
+    case ETeleportDirection::Up:
+    {
+        s_WM.Trans.z += Utils::GetRandomNumber(1.0f, 100.0f);
+        break;
+    }
+    case ETeleportDirection::Forward:
+    {
+        const auto s_Forward = (-s_WM.Backward).Normalized();
+        s_WM.Trans += s_Forward * Utils::GetRandomNumber(1.0f, 10.0f);
+        break;
+    }
+    default:
+        break;
+    }
 
-    s_PlayerSpatialEntity->SetWorldMatrix(s_Pos);
+    s_PlayerSpatialEntity->SetWorldMatrix(s_WM);
 }
