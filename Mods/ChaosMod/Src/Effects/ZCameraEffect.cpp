@@ -5,10 +5,15 @@
 #include <Glacier/ZCameraEntity.h>
 #include <Glacier/ZScene.h>
 #include <Glacier/SExternalReferences.h>
+#include <Glacier/SGameUpdateEvent.h>
 
 #include "Logging.h"
 
+#include "Helpers/Utils.h"
+
 #define TAG "[ZCameraEffect] "
+
+constexpr float32 c_LerpFactor = 1.0f / 2.0f; // 2 seconds to fully interpolate
 
 static std::string ECameraTypeToString(ZCameraEffect::ECameraType p_eCameraType)
 {
@@ -52,6 +57,7 @@ void ZCameraEffect::Start()
 
     SetActiveCamera(m_OverheadCameraEntity, m_OriginalCameraEntity);
     m_bApplyCameraTransform = true;
+    m_fLerpPoint = 0.0f;
 }
 
 void ZCameraEffect::Stop()
@@ -70,6 +76,7 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
 
     auto s_CameraSpatialEntity = m_OverheadCameraEntity.QueryInterface<ZSpatialEntity>();
     auto s_TargetWM = s_CameraSpatialEntity->GetWorldMatrix();
+
     switch (m_eCameraType)
     {
     case ECameraType::Overhead:
@@ -81,6 +88,13 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
 
         s_TargetWM.Trans = s_PlayerWM.Trans;
         s_TargetWM.Trans.z += m_fOverheadDistance; // elevate
+
+        // lerp to target transform
+        s_TargetWM.Trans = Utils::Lerp(
+            s_PlayerWM.Trans,
+            s_TargetWM.Trans,
+            m_fLerpPoint
+        );
 
         // rotate facing downwards
         s_TargetWM.XAxis = float4(0.0f, 1.0f, 0.0f, 0.0f);
@@ -95,9 +109,10 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
         s_TargetWM = s_OriginalCameraSpatialEntity->GetWorldMatrix();
 
         // rotate around forward axis by 180 degrees to flip the screen
+        constexpr auto s_TargetRotation = 3.14159f; // 180 degrees
         const auto s_RotationMatrix = SMatrix::RotationAxisAngle(
             (-s_TargetWM.Backward).Normalized(),
-            3.14159f // 180 degrees
+            Utils::Lerp(0.0f, s_TargetRotation, m_fLerpPoint)
         );
         s_TargetWM = s_RotationMatrix * s_TargetWM;
         break;
@@ -107,6 +122,8 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
     }
 
     s_CameraSpatialEntity->SetWorldMatrix(s_TargetWM);
+
+    m_fLerpPoint += c_LerpFactor * p_UpdateEvent.m_GameTimeDelta.ToSeconds();
 }
 
 void ZCameraEffect::OnDrawDebugUI()

@@ -35,6 +35,7 @@ private:
 
     bool m_bApplyCameraTransform = false;
     float32 m_fOverheadDistance = 5.0f;
+    float32 m_fLerpPoint = 0.0f;
 
     ZEntityRef m_OverheadCameraEntity;
     ZEntityRef m_OriginalCameraEntity;

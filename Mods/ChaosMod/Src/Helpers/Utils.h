@@ -25,6 +25,21 @@ namespace Utils
         }
     }
 
+    template <typename T>
+    static T Lerp(const T& p_A, const T& p_B, const float32 p_t)
+    {
+        if (p_t <= 0.0f)
+        {
+            return p_A;
+        }
+        else if (p_t >= 1.0f)
+        {
+            return p_B;
+        }
+
+        return p_A + (p_B - p_A) * p_t;
+    }
+
     ZActor* GetRandomActor(const bool p_bRequireAlive);
 
     bool TeleportPlayerTo(const SMatrix p_Position);
