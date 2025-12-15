@@ -29,14 +29,14 @@ public:
     virtual void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent) {};
 
     /**
-     * Called for drawing effect-specific UI in the ZHMModSKD menu, allowing 
+     * Called for drawing effect-specific UI in the ZHMModSDK menu, allowing 
      * effects to create custom windows.
      * Forwards @see IPluginInterface::OnDrawUI
      */
     virtual void OnDrawUI(const bool p_HasFocus) {};
 
     /**
-     * Called withing the rendering pass of the ChaosMod debug menu, allowing
+     * Called within the rendering pass of the ChaosMod debug menu, allowing
      * effects to display debug information (when selected for debug).
      * since a window is already created, effects only need to use ImGui controls.
      */

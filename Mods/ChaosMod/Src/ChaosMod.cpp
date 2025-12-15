@@ -18,6 +18,7 @@
 #include "Effects/ZExplodeRandomActorEffect.h"
 #include "Effects/ZFakeCrashEffect.h"
 #include "Effects/ZLagEffect.h"
+#include "Effects/ZCameraEffect.h"
 #include "Effects/ZPlayerPoweredRagdollEffect.h"
 #include "Effects/ZPlayerRagdollEffect.h"
 #include "Effects/ZPlayerRagdollImpulseEffect.h"
@@ -35,6 +36,8 @@ ChaosMod::ChaosMod() : m_bMenuActive(false),
                        m_EffectTimer(std::bind(&ChaosMod::TriggerRandomChaosModule, this), 30.0)
 {
     m_aEffects = std::vector<IChaosEffect*>{
+        new ZCameraEffect(ZCameraEffect::ECameraType::Flipped),
+        new ZCameraEffect(ZCameraEffect::ECameraType::Overhead),
         new ZExplodeRandomActorEffect(),
         new ZFakeCrashEffect(),
         new ZLagEffect(),
