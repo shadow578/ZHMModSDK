@@ -30,12 +30,12 @@ static std::string ECameraTypeToString(ZCameraEffect::ECameraType p_eCameraType)
 
 std::string ZCameraEffect::GetName()
 {
-    return "ZCameraEffect_" + ECameraTypeToString(m_eCameraType);
+    return "ZCameraEffect_" + ECameraTypeToString(m_eType);
 }
 
 std::string ZCameraEffect::GetDisplayName()
 {
-    switch (m_eCameraType)
+    switch (m_eType)
     {
     case ECameraType::Overhead:
         return "GTA1 Mode";
@@ -56,28 +56,45 @@ void ZCameraEffect::Start()
     }
 
     SetActiveCamera(m_OverheadCameraEntity, m_OriginalCameraEntity);
-    m_bApplyCameraTransform = true;
+    m_eState = ECameraState::LerpIn;
     m_fLerpPoint = 0.0f;
 }
 
 void ZCameraEffect::Stop()
 {
-    ZEntityRef s_Dummy;
-    SetActiveCamera(m_OriginalCameraEntity, s_Dummy);
-    m_bApplyCameraTransform = false;
+    m_eState = ECameraState::LerpOut;
+    m_fLerpPoint = 0.0f;
 }
 
 void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
 {
-    if (!m_bApplyCameraTransform)
+    // disable state skips frame updates,
+    // all other states apply transform
+    if (m_eState == ECameraState::Disabled)
     {
         return;
     }
 
+    if (!m_OverheadCameraEntity || !m_OriginalCameraEntity)
+    {
+        m_eState = ECameraState::Disabled;
+        return;
+    }
+
+    // get references to all involved spatial entities
+    auto s_OriginalCameraSpatialEntity = m_OriginalCameraEntity.QueryInterface<ZSpatialEntity>();
     auto s_CameraSpatialEntity = m_OverheadCameraEntity.QueryInterface<ZSpatialEntity>();
+    if (!s_OriginalCameraSpatialEntity || !s_CameraSpatialEntity)
+    {
+        m_eState = ECameraState::Disabled;
+        return;
+    }
+
+    auto s_OriginalWM = s_OriginalCameraSpatialEntity->GetWorldMatrix();
     auto s_TargetWM = s_CameraSpatialEntity->GetWorldMatrix();
 
-    switch (m_eCameraType)
+    // set target based on camera type
+    switch (m_eType)
     {
     case ECameraType::Overhead:
     {
@@ -89,30 +106,21 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
         s_TargetWM.Trans = s_PlayerWM.Trans;
         s_TargetWM.Trans.z += m_fOverheadDistance; // elevate
 
-        // lerp to target transform
-        s_TargetWM.Trans = Utils::Lerp(
-            s_PlayerWM.Trans,
-            s_TargetWM.Trans,
-            m_fLerpPoint
-        );
-
         // rotate facing downwards
         s_TargetWM.XAxis = float4(0.0f, 1.0f, 0.0f, 0.0f);
-        s_TargetWM.YAxis = float4(-1.0f, 0.0f, 0.0f, 0.0f);
-        s_TargetWM.ZAxis = float4(1.0f, 0.0f, 1.0f, 0.0f);
+        s_TargetWM.YAxis = float4(-1.0f, 0.0f, -0.0f, 0.0f);
+        s_TargetWM.ZAxis = float4(-0.0f, 0.0f, 1.0f, 0.0f);
         break;
     }
     case ECameraType::Flipped:
     {
         // copy stock player camera
-        auto s_OriginalCameraSpatialEntity = m_OriginalCameraEntity.QueryInterface<ZSpatialEntity>();
-        s_TargetWM = s_OriginalCameraSpatialEntity->GetWorldMatrix();
+        s_TargetWM = s_OriginalWM;
 
         // rotate around forward axis by 180 degrees to flip the screen
-        constexpr auto s_TargetRotation = 3.14159f; // 180 degrees
         const auto s_RotationMatrix = SMatrix::RotationAxisAngle(
             (-s_TargetWM.Backward).Normalized(),
-            Utils::Lerp(0.0f, s_TargetRotation, m_fLerpPoint)
+            3.14159f // 180 degrees
         );
         s_TargetWM = s_RotationMatrix * s_TargetWM;
         break;
@@ -121,39 +129,92 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
         break;
     }
 
+    // lerp towards target
+    // LerpIn: from original to target
+    // Disabling and LerpOut: from target to original
+    // Stable state: no lerp, already at target
+    switch (m_eState)
+    {
+    case ECameraState::LerpIn:
+        s_TargetWM = Utils::LerpAffine(s_OriginalWM, s_TargetWM, m_fLerpPoint);
+        break;
+    case ECameraState::Disabling:
+    case ECameraState::LerpOut:
+        s_TargetWM = Utils::LerpAffine(s_TargetWM, s_OriginalWM, m_fLerpPoint);
+        break;
+    default:
+        break;
+    }
+    m_fLerpPoint += c_LerpFactor * p_UpdateEvent.m_GameTimeDelta.ToSeconds();
+
     s_CameraSpatialEntity->SetWorldMatrix(s_TargetWM);
 
-    m_fLerpPoint += c_LerpFactor * p_UpdateEvent.m_GameTimeDelta.ToSeconds();
+    // advance state machine
+    switch (m_eState)
+    {
+    case ECameraState::LerpIn:
+    {
+        if (m_fLerpPoint >= 1.0f)
+        {
+            m_eState = ECameraState::Stable;
+        }
+        break;
+    }
+    case ECameraState::LerpOut:
+    {
+        if (m_fLerpPoint >= 1.0f)
+        {
+            m_eState = ECameraState::Disabling;
+        }
+        break;
+    }
+    case ECameraState::Disabling:
+    {
+        ZEntityRef s_Dummy;
+        SetActiveCamera(m_OriginalCameraEntity, s_Dummy);
+        m_eState = ECameraState::Disabled;
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+void ZCameraEffect::OnClearScene()
+{
+    m_eState = ECameraState::Disabled;
+    m_OverheadCameraEntity = {};
+    m_OriginalCameraEntity = {};
 }
 
 void ZCameraEffect::OnDrawDebugUI()
 {
-    if (ImGui::BeginCombo("Camera Type", ECameraTypeToString(m_eCameraType).c_str()))
+    ImGui::TextUnformatted(fmt::format("Current State: {}", static_cast<int>(m_eState)).c_str());
+
+    if (ImGui::BeginCombo("Camera Type", ECameraTypeToString(m_eType).c_str()))
     {
         for (int i = 0; i < static_cast<int>(ECameraType::NUMBER_OF_TYPES); i++)
         {
             auto s_eType = static_cast<ECameraType>(i);
             if (ImGui::Selectable(
                 ECameraTypeToString(static_cast<ECameraType>(i)).c_str(),
-                s_eType == m_eCameraType
+                s_eType == m_eType
             ))
             {
-                m_eCameraType = s_eType;
+                m_eType = s_eType;
             }
         }
 
         ImGui::EndCombo();
     }
 
-    ImGui::Checkbox("Update Camera World Matrix", &m_bApplyCameraTransform);
-
-    switch (m_eCameraType)
+    switch (m_eType)
     {
-        case ECameraType::Overhead:
-            ImGui::DragFloat("Overhead Distance", &m_fOverheadDistance, 0.1f, 1.0f, 100.0f);
-            break;
-        case ECameraType::Flipped:
-            break;
+    case ECameraType::Overhead:
+        ImGui::DragFloat("Overhead Distance", &m_fOverheadDistance, 0.1f, 1.0f, 100.0f);
+        break;
+    case ECameraType::Flipped:
+        break;
     }
 }
 

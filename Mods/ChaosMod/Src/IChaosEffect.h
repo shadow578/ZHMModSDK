@@ -24,6 +24,12 @@ public:
     virtual void OnEngineInitialized() {};
 
     /**
+     * Called when the current scene unloads.
+     * Effects shall clean up any spawned entities, as they will no longer be valid.
+     */
+    virtual void OnClearScene() {};
+
+    /**
      * Called every frame during play mode (not when paused).
      */
     virtual void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent) {};

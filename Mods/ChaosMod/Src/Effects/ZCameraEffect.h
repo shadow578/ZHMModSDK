@@ -15,7 +15,7 @@ public:
     };
 
     ZCameraEffect(const ECameraType p_eCameraType) :
-        m_eCameraType(p_eCameraType)
+        m_eType(p_eCameraType)
     {
     }
 
@@ -23,19 +23,31 @@ public:
     void OnDrawDebugUI() override;
     void Start() override;
     void Stop() override;
+    void OnClearScene() override;
 
     std::string GetName() override;
     std::string GetDisplayName() override;
 
 private:
+    enum class ECameraState
+    {
+        LerpIn,
+        Stable,
+        LerpOut,
+        Disabling,
+        Disabled
+    };
+
     bool SpawnCameraEntity();
     void SetActiveCamera(ZEntityRef& p_pNewCameraEntity, ZEntityRef& p_pPreviousCameraEntity);
 
-    ECameraType m_eCameraType;
+    ECameraType m_eType;
 
-    bool m_bApplyCameraTransform = false;
-    float32 m_fOverheadDistance = 5.0f;
+    ECameraState m_eState = ECameraState::Disabled;
     float32 m_fLerpPoint = 0.0f;
+
+
+    float32 m_fOverheadDistance = 5.0f;
 
     ZEntityRef m_OverheadCameraEntity;
     ZEntityRef m_OriginalCameraEntity;

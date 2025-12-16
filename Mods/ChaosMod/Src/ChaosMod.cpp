@@ -290,6 +290,15 @@ DEFINE_PLUGIN_DETOUR(ChaosMod, void, OnLoadScene, ZEntitySceneContext *th, SScen
 DEFINE_PLUGIN_DETOUR(ChaosMod, void, OnClearScene, ZEntitySceneContext *th, bool p_FullyUnloadScene)
 {
     m_EffectTimer.m_bEnable = false;
+    for (auto* s_pEffect : m_aEffects)
+    {
+        if (s_pEffect && s_pEffect->Available())
+        {
+            Logger::Debug(TAG "Forwarding OnClearScene to '{}'", s_pEffect->GetName());
+            s_pEffect->OnClearScene();
+        }
+    }
+
     return HookResult<void>(HookAction::Continue());
 }
 
