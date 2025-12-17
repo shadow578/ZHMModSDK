@@ -11,7 +11,7 @@ void ZLagEffect::Stop()
     m_bEnabled = false;
 }
 
-void ZLagEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
+void ZLagEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining)
 {
     if (m_bEnabled)
     {

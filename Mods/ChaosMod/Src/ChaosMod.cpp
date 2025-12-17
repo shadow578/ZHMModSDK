@@ -100,11 +100,12 @@ void ChaosMod::OnEngineInitialized()
 
 void ChaosMod::OnFrameUpdate(const SGameUpdateEvent &p_UpdateEvent)
 {
+    const auto s_fTimeRemaining = m_EffectTimer.m_fIntervalSeconds - m_EffectTimer.GetElapsedSeconds();
     for (auto *s_pEffect : m_aEffects)
     {
         if (s_pEffect && s_pEffect->Available())
         {
-            s_pEffect->OnFrameUpdate(p_UpdateEvent);
+            s_pEffect->OnFrameUpdate(p_UpdateEvent, s_pEffect == m_pLastEffect ? s_fTimeRemaining : 0.0f);
         }
     }
 }

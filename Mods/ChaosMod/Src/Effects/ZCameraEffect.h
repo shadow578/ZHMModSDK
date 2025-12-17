@@ -19,7 +19,7 @@ public:
     {
     }
 
-    void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent) override;
+    void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining) override;
     void OnDrawDebugUI() override;
     void Start() override;
     void Stop() override;
@@ -31,11 +31,10 @@ public:
 private:
     enum class ECameraState
     {
+        Disabled,
         LerpIn,
         Stable,
-        LerpOut,
-        Disabling,
-        Disabled
+        LerpOut
     };
 
     bool SpawnCameraEntity();

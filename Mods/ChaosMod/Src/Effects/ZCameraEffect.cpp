@@ -13,7 +13,7 @@
 
 #define TAG "[ZCameraEffect] "
 
-constexpr float32 c_LerpFactor = 1.0f / 2.0f; // 2 seconds to fully interpolate
+constexpr float32 c_LerpDuration = 2.0f; // seconds
 
 static std::string ECameraTypeToString(ZCameraEffect::ECameraType p_eCameraType)
 {
@@ -48,10 +48,17 @@ std::string ZCameraEffect::GetDisplayName()
 
 void ZCameraEffect::Start()
 {
+    if (m_eState != ECameraState::Disabled)
+    {
+        Logger::Debug(TAG "Effect already running, aborting start.");
+        return;
+    }
+
     if (!SpawnCameraEntity())
     {
         Logger::Debug(TAG "Could not spawn overhead camera entity, aborting effect.");
         m_bIsAvailable = false;
+        m_eState = ECameraState::Disabled;
         return;
     }
 
@@ -62,11 +69,12 @@ void ZCameraEffect::Start()
 
 void ZCameraEffect::Stop()
 {
-    m_eState = ECameraState::LerpOut;
-    m_fLerpPoint = 0.0f;
+    ZEntityRef s_Dummy;
+    SetActiveCamera(m_OriginalCameraEntity, s_Dummy);
+    m_eState = ECameraState::Disabled;
 }
 
-void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
+void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining)
 {
     // disable state skips frame updates,
     // all other states apply transform
@@ -129,23 +137,19 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
         break;
     }
 
-    // lerp towards target
-    // LerpIn: from original to target
-    // Disabling and LerpOut: from target to original
-    // Stable state: no lerp, already at target
+    // lerp towards end state
     switch (m_eState)
     {
     case ECameraState::LerpIn:
         s_TargetWM = Utils::LerpAffine(s_OriginalWM, s_TargetWM, m_fLerpPoint);
         break;
-    case ECameraState::Disabling:
     case ECameraState::LerpOut:
         s_TargetWM = Utils::LerpAffine(s_TargetWM, s_OriginalWM, m_fLerpPoint);
         break;
     default:
         break;
     }
-    m_fLerpPoint += c_LerpFactor * p_UpdateEvent.m_GameTimeDelta.ToSeconds();
+    m_fLerpPoint += p_UpdateEvent.m_GameTimeDelta.ToSeconds() / c_LerpDuration;
 
     s_CameraSpatialEntity->SetWorldMatrix(s_TargetWM);
 
@@ -160,19 +164,20 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
         }
         break;
     }
+    case ECameraState::Stable:
+        // start lerp out early
+        if (p_fEffectTimeRemaining != 0.0f && p_fEffectTimeRemaining <= c_LerpDuration + 0.1f)
+        {
+            m_eState = ECameraState::LerpOut;
+            m_fLerpPoint = 0.0f;
+        }
+        break;
     case ECameraState::LerpOut:
     {
         if (m_fLerpPoint >= 1.0f)
         {
-            m_eState = ECameraState::Disabling;
+            m_eState = ECameraState::Disabled;
         }
-        break;
-    }
-    case ECameraState::Disabling:
-    {
-        ZEntityRef s_Dummy;
-        SetActiveCamera(m_OriginalCameraEntity, s_Dummy);
-        m_eState = ECameraState::Disabled;
         break;
     }
     default:
@@ -190,6 +195,7 @@ void ZCameraEffect::OnClearScene()
 void ZCameraEffect::OnDrawDebugUI()
 {
     ImGui::TextUnformatted(fmt::format("Current State: {}", static_cast<int>(m_eState)).c_str());
+    ImGui::TextUnformatted(fmt::format("Lerp Point:   {:.3f}", m_fLerpPoint).c_str());
 
     if (ImGui::BeginCombo("Camera Type", ECameraTypeToString(m_eType).c_str()))
     {

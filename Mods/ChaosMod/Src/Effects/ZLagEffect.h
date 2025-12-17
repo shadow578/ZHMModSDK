@@ -6,7 +6,7 @@ class ZLagEffect : public IChaosEffect
 {
     void Start() override;
     void Stop() override;
-    void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent) override;
+    void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining) override;
 
     std::string GetDisplayName() override
     {

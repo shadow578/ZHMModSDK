@@ -31,8 +31,10 @@ public:
 
     /**
      * Called every frame during play mode (not when paused).
+     * @param p_UpdateEvent Engine update event containing timing information.
+     * @param p_fEffectTimeRemaining Time remaining for the effect in seconds, or 0 if effect is inactive.
      */
-    virtual void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent) {};
+    virtual void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining) {};
 
     /**
      * Called for drawing effect-specific UI in the ZHMModSDK menu, allowing 
