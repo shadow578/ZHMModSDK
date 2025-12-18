@@ -38,6 +38,8 @@ ChaosMod::ChaosMod() : m_bMenuActive(false),
     m_aEffects = std::vector<IChaosEffect*>{
         new ZCameraEffect(ZCameraEffect::ECameraType::Flipped),
         new ZCameraEffect(ZCameraEffect::ECameraType::Overhead),
+        new ZCameraEffect(ZCameraEffect::ECameraType::WideFOV),
+        new ZCameraEffect(ZCameraEffect::ECameraType::ZoomFOV),
         new ZExplodeRandomActorEffect(),
         new ZFakeCrashEffect(),
         new ZLagEffect(),

@@ -11,6 +11,8 @@ public:
     {
         Overhead,
         Flipped,
+        ZoomFOV,
+        WideFOV,
         NUMBER_OF_TYPES
     };
 
@@ -39,6 +41,8 @@ private:
 
     bool SpawnCameraEntity();
     void SetActiveCamera(ZEntityRef& p_pNewCameraEntity, ZEntityRef& p_pPreviousCameraEntity);
+
+    float32 GetFreeHeightFor(const SMatrix& p_Position, const float32 p_fMaxHeight);
 
     ECameraType m_eType;
 

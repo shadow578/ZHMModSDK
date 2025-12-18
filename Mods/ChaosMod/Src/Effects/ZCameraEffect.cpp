@@ -6,6 +6,7 @@
 #include <Glacier/ZScene.h>
 #include <Glacier/SExternalReferences.h>
 #include <Glacier/SGameUpdateEvent.h>
+#include <Glacier/ZCollision.h>
 
 #include "Logging.h"
 
@@ -15,6 +16,13 @@
 
 constexpr float32 c_LerpDuration = 2.0f; // seconds
 
+constexpr float32 c_fOverheadMinDistance = 2.0f; // at least 47's height
+constexpr float32 c_fOverheadMaxDistance = 15.0f;
+
+constexpr float32 c_ZoomFOV = 10.0f;
+constexpr float32 c_WideFOV = 120.0f;
+const std::string c_CameraFOVPropertyName = "m_fFovYDeg";
+
 static std::string ECameraTypeToString(ZCameraEffect::ECameraType p_eCameraType)
 {
     switch (p_eCameraType)
@@ -23,6 +31,10 @@ static std::string ECameraTypeToString(ZCameraEffect::ECameraType p_eCameraType)
         return "Overhead";
     case ZCameraEffect::ECameraType::Flipped:
         return "Flipped";
+    case ZCameraEffect::ECameraType::ZoomFOV:
+        return "ZoomFOV";
+    case ZCameraEffect::ECameraType::WideFOV:
+        return "WideFOV";
     default:
         return "<" + std::to_string(static_cast<int>(p_eCameraType)) + ">";
     }
@@ -41,6 +53,10 @@ std::string ZCameraEffect::GetDisplayName()
         return "GTA1 Mode";
     case ECameraType::Flipped:
         return "Turn Turtle";
+    case ECameraType::ZoomFOV:
+        return "Binoculars";
+    case ECameraType::WideFOV:
+        return "Quake Pro FOV";
     default:
         return GetName();
     }
@@ -100,6 +116,7 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const f
 
     auto s_OriginalWM = s_OriginalCameraSpatialEntity->GetWorldMatrix();
     auto s_TargetWM = s_CameraSpatialEntity->GetWorldMatrix();
+    float32 s_fTargetFOV = -1.0f, s_fOriginalFOV = -1.0f;
 
     // set target based on camera type
     switch (m_eType)
@@ -112,7 +129,11 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const f
         auto s_PlayerWM = s_PlayerSpatialEntity->GetWorldMatrix();
 
         s_TargetWM.Trans = s_PlayerWM.Trans;
-        s_TargetWM.Trans.z += m_fOverheadDistance; // elevate
+        s_TargetWM.Trans.z += c_fOverheadMinDistance;
+        s_TargetWM.Trans.z = GetFreeHeightFor(
+            s_TargetWM,
+            c_fOverheadMaxDistance
+        ); // elevate
 
         // rotate facing downwards
         s_TargetWM.XAxis = float4(0.0f, 1.0f, 0.0f, 0.0f);
@@ -133,18 +154,46 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const f
         s_TargetWM = s_RotationMatrix * s_TargetWM;
         break;
     }
+    case ECameraType::ZoomFOV:
+    case ECameraType::WideFOV:
+    {
+        // copy stock player camera
+        s_TargetWM = s_OriginalWM;
+
+        s_fTargetFOV = (m_eType == ECameraType::ZoomFOV) ? c_ZoomFOV : c_WideFOV;
+        s_fOriginalFOV = *m_OriginalCameraEntity.GetProperty<float32>(c_CameraFOVPropertyName).As<float32>();
+        break;
+    }
     default:
         break;
     }
 
-    // lerp towards end state
+    // lerp towards end transform and fov
     switch (m_eState)
     {
     case ECameraState::LerpIn:
         s_TargetWM = Utils::LerpAffine(s_OriginalWM, s_TargetWM, m_fLerpPoint);
+
+        if (s_fTargetFOV > 0.0f)
+        {
+            s_fTargetFOV = Utils::Lerp(
+                s_fOriginalFOV,
+                s_fTargetFOV,
+                m_fLerpPoint
+            );
+        }
         break;
     case ECameraState::LerpOut:
         s_TargetWM = Utils::LerpAffine(s_TargetWM, s_OriginalWM, m_fLerpPoint);
+
+        if (s_fTargetFOV > 0.0f)
+        {
+            s_fTargetFOV = Utils::Lerp(
+                s_fTargetFOV,
+                s_fOriginalFOV,
+                m_fLerpPoint
+            );
+        }
         break;
     default:
         break;
@@ -152,6 +201,11 @@ void ZCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const f
     m_fLerpPoint += p_UpdateEvent.m_GameTimeDelta.ToSeconds() / c_LerpDuration;
 
     s_CameraSpatialEntity->SetWorldMatrix(s_TargetWM);
+
+    if (s_fTargetFOV > 0.0f)
+    {
+        m_OverheadCameraEntity.SetProperty(c_CameraFOVPropertyName, s_fTargetFOV);
+    }
 
     // advance state machine
     switch (m_eState)
@@ -217,11 +271,35 @@ void ZCameraEffect::OnDrawDebugUI()
     switch (m_eType)
     {
     case ECameraType::Overhead:
-        ImGui::DragFloat("Overhead Distance", &m_fOverheadDistance, 0.1f, 1.0f, 100.0f);
-        break;
-    case ECameraType::Flipped:
+    {
+        ImGui::DragFloat("Max Overhead Distance", &m_fOverheadDistance, 0.1f, 1.0f, 100.0f);
         break;
     }
+    default:
+        break;
+    }
+}
+
+float32 ZCameraEffect::GetFreeHeightFor(const SMatrix& p_Position, const float32 p_fMaxHeight)
+{
+    if (!*Globals::CollisionManager)
+    {
+        return p_fMaxHeight;
+    }
+
+    ZRayQueryInput s_RayInput{
+        .m_vFrom = p_Position.Trans,
+        .m_vTo = p_Position.Trans + (p_Position.Up * p_fMaxHeight),
+    };
+    ZRayQueryOutput s_RayOutput {};
+
+    if (!(*Globals::CollisionManager)->RayCastClosestHit(s_RayInput, &s_RayOutput))
+    {
+        // ray didn't hit anything
+        return p_fMaxHeight;
+    }
+
+    return s_RayOutput.m_vPosition.z;
 }
 
 bool ZCameraEffect::SpawnCameraEntity()
