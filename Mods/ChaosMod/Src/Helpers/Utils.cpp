@@ -4,7 +4,7 @@
 
 #include "Glacier/ZSpatialEntity.h"
 
-SMatrix Utils::LerpAffine(const SMatrix& p_A, const SMatrix& p_B, const float32 p_fT)
+SMatrix Utils::InterpolateAffine(const SMatrix& p_A, const SMatrix& p_B, const float32 p_fT)
 {
     if (p_fT <= 0.0f)
     {

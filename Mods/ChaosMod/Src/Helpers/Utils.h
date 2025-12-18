@@ -26,7 +26,7 @@ namespace Utils
     }
 
     template <typename T>
-    static T Lerp(const T& p_A, const T& p_B, const float32 p_fT)
+    static T Interpolate(const T& p_A, const T& p_B, const float32 p_fT)
     {
         if (p_fT <= 0.0f)
         {
@@ -40,7 +40,7 @@ namespace Utils
         return p_A + (p_B - p_A) * p_fT;
     }
 
-    SMatrix LerpAffine(const SMatrix& p_A, const SMatrix& p_B, const float32 p_fT);
+    SMatrix InterpolateAffine(const SMatrix& p_A, const SMatrix& p_B, const float32 p_fT);
 
     ZActor* GetRandomActor(const bool p_bRequireAlive);
 

@@ -1,0 +1,37 @@
+#pragma once
+
+#include "IChaosEffect.h"
+
+#include <Glacier/ZEntity.h>
+
+class ZCameraEffectBase : public virtual IChaosEffect
+{
+public:
+    void Start() override;
+    void Stop() override;
+    void OnClearScene() override;
+
+protected:
+    inline ZEntityRef GetEffectCameraEntity() const
+    {
+        return m_EffectCameraEntity;
+    }
+
+    inline ZEntityRef GetOriginalCameraEntity() const
+    {
+        return m_OriginalCameraEntity;
+    }
+
+    inline bool IsEffectCameraActive() const
+    {
+        return m_bEffectCameraActive && m_EffectCameraEntity && m_OriginalCameraEntity;
+    }
+
+private:
+    bool EnsureCameraEntity();
+    bool SetActiveCamera(ZEntityRef& p_pNewCameraEntity, ZEntityRef& p_pPreviousCameraEntity);
+
+    bool m_bEffectCameraActive = false;
+    ZEntityRef m_EffectCameraEntity;
+    ZEntityRef m_OriginalCameraEntity;
+};

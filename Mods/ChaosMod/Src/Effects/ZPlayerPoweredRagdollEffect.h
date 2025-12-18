@@ -11,6 +11,6 @@ class ZPlayerPoweredRagdollEffect : public IChaosEffect
 
     std::string GetDisplayName() override
     {
-        return "Sleepwalk Mode";
+        return "Floppy 47";
     }
 };

@@ -15,10 +15,12 @@
 
 #include <array>
 
+#include "Effects/ZCameraFOVEffect.h"
 #include "Effects/ZExplodeRandomActorEffect.h"
 #include "Effects/ZFakeCrashEffect.h"
+#include "Effects/ZFlipCameraEffect.h"
 #include "Effects/ZLagEffect.h"
-#include "Effects/ZCameraEffect.h"
+#include "Effects/ZOverheadCameraEffect.h"
 #include "Effects/ZPlayerPoweredRagdollEffect.h"
 #include "Effects/ZPlayerRagdollEffect.h"
 #include "Effects/ZPlayerRagdollImpulseEffect.h"
@@ -36,13 +38,13 @@ ChaosMod::ChaosMod() : m_bMenuActive(false),
                        m_EffectTimer(std::bind(&ChaosMod::TriggerRandomChaosModule, this), 30.0)
 {
     m_aEffects = std::vector<IChaosEffect*>{
-        new ZCameraEffect(ZCameraEffect::ECameraType::Flipped),
-        new ZCameraEffect(ZCameraEffect::ECameraType::Overhead),
-        new ZCameraEffect(ZCameraEffect::ECameraType::WideFOV),
-        new ZCameraEffect(ZCameraEffect::ECameraType::ZoomFOV),
-        new ZExplodeRandomActorEffect(),
+        new ZCameraFOVEffect(ZCameraFOVEffect::EType::WideFOV),
+        new ZCameraFOVEffect(ZCameraFOVEffect::EType::ZoomFOV),
+        //new ZExplodeRandomActorEffect(),
         new ZFakeCrashEffect(),
+        new ZFlipCameraEffect(),
         new ZLagEffect(),
+        new ZOverheadCameraEffect(),
         new ZPlayerPoweredRagdollEffect(),
         new ZPlayerRagdollEffect(),
         new ZPlayerRagdollImpulseEffect(),
