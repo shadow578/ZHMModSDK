@@ -43,6 +43,11 @@ SMatrix Utils::InterpolateAffine(const SMatrix& p_A, const SMatrix& p_B, const f
 
 ZActor *Utils::GetRandomActor(const bool p_bRequireAlive)
 {
+    if (!Globals::NextActorId || *Globals::NextActorId <= 0)
+    {
+        return nullptr;
+    }
+
     // limit tries
     for (int t = 0; t < 10; t++)
     {
