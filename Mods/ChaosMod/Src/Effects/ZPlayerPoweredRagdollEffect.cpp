@@ -3,6 +3,7 @@
 #include "IPluginInterface.h"
 #include "Functions.h"
 
+#include "EffectRegistry.h"
 #include <Glacier/ZHitman5.h>
 
 void ZPlayerPoweredRagdollEffect::Start()
@@ -49,3 +50,5 @@ bool ZPlayerPoweredRagdollEffect::Available()
     return Functions::ZHM5BaseCharacter_ActivatePoweredRagdoll->Exists() &&
         Functions::ZHM5BaseCharacter_DeactivateRagdoll->Exists();
 }
+
+REGISTER_CHAOS_EFFECT(ZPlayerPoweredRagdollEffect)

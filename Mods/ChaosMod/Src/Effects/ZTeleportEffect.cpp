@@ -2,6 +2,7 @@
 
 #include "Glacier/ZSpatialEntity.h"
 
+#include "EffectRegistry.h"
 #include "Helpers/Utils.h"
 
 void ZTeleportEffect::Start()
@@ -61,3 +62,5 @@ void ZTeleportEffect::DoTeleport(const ETeleportDirection p_eDirection)
 
     s_PlayerSpatialEntity->SetWorldMatrix(s_WM);
 }
+
+REGISTER_CHAOS_EFFECT(ZTeleportEffect)

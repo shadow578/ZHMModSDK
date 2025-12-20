@@ -4,11 +4,15 @@
 
 class ZSlowTimeScaleEffect : public IChaosEffect
 {
+public:
+    ZSlowTimeScaleEffect(const float32 p_fTargetTimeScale) : m_fTargetTimeScale(p_fTargetTimeScale) {}
+
     void Start() override;
     void Stop() override;
 
     std::string GetDisplayName() override;
 
 private:
+    float32 m_fTargetTimeScale = 0.2f;
     float32 m_fPreviousTimeScale = 1.0f;
 };

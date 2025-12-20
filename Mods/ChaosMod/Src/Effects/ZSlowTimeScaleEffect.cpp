@@ -4,12 +4,12 @@
 
 #include "Glacier/ZGameTime.h"
 
-constexpr float32 g_fSlowTimeScale = 0.2f;
+#include "EffectRegistry.h"
 
 void ZSlowTimeScaleEffect::Start()
 {
     m_fPreviousTimeScale = Globals::GameTimeManager->m_fTimeMultiplier1;
-    Globals::GameTimeManager->m_fTimeMultiplier1 = g_fSlowTimeScale;
+    Globals::GameTimeManager->m_fTimeMultiplier1 = m_fTargetTimeScale;
 }
 
 void ZSlowTimeScaleEffect::Stop()
@@ -19,5 +19,7 @@ void ZSlowTimeScaleEffect::Stop()
 
 std::string ZSlowTimeScaleEffect::GetDisplayName()
 {
-    return fmt::format("{:.1f}x Game Speed", g_fSlowTimeScale);
+    return fmt::format("{:.1f}x Game Speed", m_fTargetTimeScale);
 }
+
+REGISTER_CHAOS_EFFECT(ZSlowTimeScaleEffect, 0.2);

@@ -3,6 +3,7 @@
 #include <Glacier/ZEntity.h>
 #include <Glacier/ZSpatialEntity.h>
 
+#include "EffectRegistry.h"
 #include "Helpers/Utils.h"
 
 void ZFlipCameraEffect::Start()
@@ -66,3 +67,5 @@ void ZFlipCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, con
 
     s_CameraSpatialEntity->SetWorldMatrix(s_TargetWM);
 }
+
+REGISTER_CHAOS_EFFECT(ZFlipCameraEffect)

@@ -4,6 +4,7 @@
 #include <Glacier/ZSpatialEntity.h>
 #include <Glacier/ZCollision.h>
 
+#include "EffectRegistry.h"
 #include "Helpers/Utils.h"
 
 constexpr float32 c_fOverheadMinDistance = 2.0f; // at least 47's height
@@ -99,3 +100,5 @@ float32 ZOverheadCameraEffect::GetMaxOverheadZAt(const SMatrix& p_Position, cons
 
     return s_RayOutput.m_vPosition.z;
 }
+
+REGISTER_CHAOS_EFFECT(ZOverheadCameraEffect)

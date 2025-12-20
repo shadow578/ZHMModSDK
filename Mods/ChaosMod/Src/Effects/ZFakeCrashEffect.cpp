@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <TlHelp32.h>
 
+#include "EffectRegistry.h"
+
 constexpr DWORD c_THREAD_SUSPEND_MILLIS = 10000; // 10 seconds
 
 void ZFakeCrashEffect::Start()
@@ -58,3 +60,5 @@ void ZFakeCrashEffect::SuspendAllThreads()
 
     CloseHandle(s_hSnapshot);
 }
+
+REGISTER_CHAOS_EFFECT(ZFakeCrashEffect)

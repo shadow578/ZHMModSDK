@@ -5,6 +5,8 @@
 #include <IconsMaterialDesign.h>
 #include <imgui_internal.h>
 
+#include "EffectRegistry.h"
+
 #define TAG "[ChaosModUI] "
 
 
@@ -18,11 +20,11 @@ void ChaosMod::OnDrawMenu()
 
 void ChaosMod::OnDrawUI(const bool p_HasFocus)
 {
-    for (auto* s_pEffect : m_aEffects)
+    for (auto& s_Effect : EffectRegistry::GetInstance().GetEffects())
     {
-        if (s_pEffect && s_pEffect->Available())
+        if (s_Effect && s_Effect->Available())
         {
-            s_pEffect->OnDrawUI(p_HasFocus);
+            s_Effect->OnDrawUI(p_HasFocus);
         }
     }
 
@@ -62,7 +64,7 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
             5.0,
             120.0);
         ImGui::Checkbox("Show Debug Menu", &m_bDebugMenuActive);
-        ImGui::TextUnformatted(fmt::format("Effects Loaded: {}", m_aEffects.size()).c_str());
+        ImGui::TextUnformatted(fmt::format("Effects Loaded: {}", EffectRegistry::GetInstance().GetEffects().size()).c_str());
     }
 
     ImGui::PopFont();
@@ -87,16 +89,16 @@ void ChaosMod::DrawDebugWindow()
     {
         ImGui::BeginChild("chaos left pane", ImVec2(300, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
 
-        for (auto* s_pEffect : m_aEffects)
+        for (auto& s_Effect : EffectRegistry::GetInstance().GetEffects())
         {
-            if (s_pEffect)
+            if (s_Effect)
             {
                 if (ImGui::Selectable(
-                    s_pEffect->GetName().c_str(),
-                    m_pEffectForDebug == s_pEffect))
+                    s_Effect->GetName().c_str(),
+                    m_pEffectForDebug == s_Effect.get()))
                 {
-                    m_pEffectForDebug = s_pEffect;
-                    Logger::Debug(TAG "Selected '{}' for debug", s_pEffect->GetName());
+                    m_pEffectForDebug = s_Effect.get();
+                    Logger::Debug(TAG "Selected '{}' for debug", s_Effect->GetName());
                 }
             }
         }

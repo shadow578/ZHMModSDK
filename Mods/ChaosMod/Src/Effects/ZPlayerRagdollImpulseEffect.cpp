@@ -6,6 +6,8 @@
 #include <Glacier/ZHitman5.h>
 #include <Glacier/ZSpatialEntity.h>
 
+#include "EffectRegistry.h"
+
 void ZPlayerRagdollImpulseEffect::Start()
 {
     auto s_Player = SDK()->GetLocalPlayer();
@@ -53,3 +55,5 @@ bool ZPlayerRagdollImpulseEffect::Available()
     return Functions::ZHM5BaseCharacter_ActivateRagdoll->Exists() &&
         Functions::ZHM5BaseCharacter_DeactivateRagdoll->Exists();
 }
+
+REGISTER_CHAOS_EFFECT(ZPlayerRagdollImpulseEffect)

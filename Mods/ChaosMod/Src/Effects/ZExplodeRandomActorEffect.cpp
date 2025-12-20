@@ -3,6 +3,7 @@
 #include "Glacier/ZMath.h"
 #include "Glacier/ZSpatialEntity.h"
 
+#include "EffectRegistry.h"
 #include "Helpers/Utils.h"
 #include "Helpers/ZExplosionHelper.h"
 
@@ -15,7 +16,7 @@ void ZExplodeRandomActorEffect::OnEngineInitialized()
 
 void ZExplodeRandomActorEffect::Start()
 {
-    ZActor* s_Actor = Utils::GetRandomActor(true);
+    ZActor *s_Actor = Utils::GetRandomActor(true);
     if (!s_Actor)
     {
         Logger::Warn(TAG "No actor found to explode!");
@@ -25,7 +26,7 @@ void ZExplodeRandomActorEffect::Start()
     ZEntityRef s_EntityRef;
     s_Actor->GetID(s_EntityRef);
 
-    ZSpatialEntity* s_ActorSpatialEntity = s_EntityRef.QueryInterface<ZSpatialEntity>();
+    ZSpatialEntity *s_ActorSpatialEntity = s_EntityRef.QueryInterface<ZSpatialEntity>();
     auto s_ActorPos = s_ActorSpatialEntity->GetWorldMatrix();
 
     // offset a bit upwards so it doesn't clip into the ground
@@ -58,3 +59,6 @@ void ZExplodeRandomActorEffect::OnDrawDebugUI()
         Utils::TeleportPlayerTo(m_LastTargetPos);
     }
 }
+
+// FIXME load is slow:
+// REGISTER_CHAOS_EFFECT(ZExplodeRandomActorEffect)

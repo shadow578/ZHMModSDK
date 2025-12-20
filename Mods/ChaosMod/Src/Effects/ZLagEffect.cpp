@@ -1,5 +1,6 @@
 #include "ZLagEffect.h"
 
+#include "EffectRegistry.h"
 
 void ZLagEffect::Start()
 {
@@ -22,3 +23,5 @@ void ZLagEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const floa
         }
     }
 }
+
+REGISTER_CHAOS_EFFECT(ZLagEffect)

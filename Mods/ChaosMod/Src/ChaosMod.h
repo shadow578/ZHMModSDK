@@ -31,8 +31,6 @@ private:
 private:
     bool m_bMenuActive = false;
 
-    std::vector<IChaosEffect*> m_aEffects;
-
     ZTimer m_EffectTimer;
     IChaosEffect* m_pLastEffect = nullptr;
 

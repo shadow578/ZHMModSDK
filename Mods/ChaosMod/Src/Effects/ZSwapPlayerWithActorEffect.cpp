@@ -2,6 +2,7 @@
 
 #include "Glacier/ZSpatialEntity.h"
 
+#include "EffectRegistry.h"
 #include "Helpers/Utils.h"
 
 #define TAG "[ZSwapPlayerWithActorEffect] "
@@ -44,3 +45,5 @@ void ZSwapPlayerWithActorEffect::OnDrawDebugUI()
         Utils::TeleportPlayerTo(m_PreviousPlayerPosition);
     }
 }
+
+REGISTER_CHAOS_EFFECT(ZSwapPlayerWithActorEffect)
