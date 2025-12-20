@@ -33,6 +33,8 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
         return;
     }
 
+    DrawDebugWindow();
+
     ImGui::PushFont(SDK()->GetImGuiBlackFont());
     const auto s_Showing = ImGui::Begin("CHAOS MOD", &m_bMenuActive);
     ImGui::PushFont(SDK()->GetImGuiRegularFont());
@@ -70,8 +72,6 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
     ImGui::PopFont();
     ImGui::End();
     ImGui::PopFont();
-
-    DrawDebugWindow();
 }
 
 void ChaosMod::DrawDebugWindow()
