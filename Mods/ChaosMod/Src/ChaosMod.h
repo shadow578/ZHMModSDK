@@ -29,16 +29,20 @@ private:
     void TriggerRandomChaosModule();
 
 private:
-    bool m_bMenuActive;
+    bool m_bMenuActive = false;
 
     std::vector<IChaosEffect*> m_aEffects;
 
     ZTimer m_EffectTimer;
-    IChaosEffect* m_pLastEffect;
+    IChaosEffect* m_pLastEffect = nullptr;
 
-    // debug
-    bool m_bDebugMenuActive;
-    IChaosEffect* m_pEffectForDebug;
+private: // Debug
+    void DrawDebugWindow();
+    void DrawEffectDebugPane();
+
+    bool m_bDebugMenuActive = false;
+    float32 m_fDebugEffectRemainingTime = 30.0f;
+    IChaosEffect* m_pEffectForDebug = nullptr;
 };
 
 DECLARE_ZHM_PLUGIN(ChaosMod)
