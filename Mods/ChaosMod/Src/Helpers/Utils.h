@@ -54,6 +54,8 @@ namespace Utils
 
     SMatrix InterpolateAffine(const SMatrix& p_A, const SMatrix& p_B, const float32 p_fT);
 
+    std::vector<ZActor*> GetActors(const bool p_bIncludeDead, const bool p_bIncludePacified);
+
     ZActor* GetRandomActor(const bool p_bRequireAlive);
 
     bool TeleportPlayerTo(const SMatrix p_Position);

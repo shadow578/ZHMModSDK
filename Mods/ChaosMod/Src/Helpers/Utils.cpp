@@ -42,29 +42,45 @@ SMatrix Utils::InterpolateAffine(const SMatrix& p_A, const SMatrix& p_B, const f
     return SMatrix(s_MatrixO);
 }
 
+
+std::vector<ZActor*> Utils::GetActors(const bool p_bIncludeDead, const bool p_bIncludePacified)
+{
+    std::vector<ZActor*> s_aActors;
+
+    if (!Globals::NextActorId || *Globals::NextActorId <= 0)
+    {
+        return s_aActors;
+    }
+
+    for (uint16 i = 0; i < *Globals::NextActorId; i++)
+    {
+        auto s_pActor = Globals::ActorManager->m_aActiveActors[i].m_pInterfaceRef;
+        if (!s_pActor)
+        {
+            continue;
+        }
+
+        if ((!p_bIncludeDead && s_pActor->IsDead()) ||
+            (!p_bIncludePacified && s_pActor->IsPacified()))
+        {
+            continue;
+        }
+
+        s_aActors.push_back(s_pActor);
+    }
+
+    return s_aActors;
+}
+
 ZActor *Utils::GetRandomActor(const bool p_bRequireAlive)
 {
-    if (!Globals::NextActorId || *Globals::NextActorId <= 0)
+    auto s_aActors = GetActors(!p_bRequireAlive, !p_bRequireAlive);
+    if (s_aActors.empty())
     {
         return nullptr;
     }
 
-    // limit tries
-    for (int t = 0; t < 10; t++)
-    {
-        // random actor id between 0 and NextActorId
-        const int s_ActorId = GetRandomNumber<int>(0, *Globals::NextActorId);
-        auto s_Actor = Globals::ActorManager->m_aActiveActors[s_ActorId].m_pInterfaceRef;
-
-        auto s_bIsAlive = !s_Actor->IsDead() && !s_Actor->IsPacified();
-
-        if (!p_bRequireAlive || s_bIsAlive)
-        {
-            return s_Actor;
-        }
-    }
-
-    return nullptr;
+    return SelectRandomElement(s_aActors);
 }
 
 bool Utils::TeleportPlayerTo(const SMatrix p_Position)

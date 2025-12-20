@@ -6,8 +6,6 @@
 #include "IChaosEffect.h"
 #include "Logging.h"
 
-#define TAG "[EffectRegistry] "
-
 
 class EffectRegistry
 {
@@ -25,7 +23,7 @@ public:
 
     void Register(std::unique_ptr<IChaosEffect> p_Effect)
     {
-        Logger::Debug(TAG "Registered effect '{}'", p_Effect->GetName());
+        Logger::Debug("[EffectRegistry] Registered effect '{}'", p_Effect->GetName());
         m_aEffects.push_back(std::move(p_Effect));
     }
 
