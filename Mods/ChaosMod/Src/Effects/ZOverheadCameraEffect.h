@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ZCameraEffectBase.h"
-#include "ZInterpolatingEffectBase.h"
+#include "Base/ZCameraEffectBase.h"
+#include "Base/ZInterpolatingEffectBase.h"
 
 class ZOverheadCameraEffect : public ZCameraEffectBase, public ZInterpolatingEffectBase
 {

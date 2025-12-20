@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ZCameraFOVEffectBase.h"
+#include "Base/ZCameraFOVEffectBase.h"
 
 class ZCameraZoomFOVEffect : public ZCameraFOVEffectBase
 {
