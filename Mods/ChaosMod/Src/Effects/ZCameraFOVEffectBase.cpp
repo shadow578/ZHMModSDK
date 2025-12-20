@@ -1,15 +1,13 @@
-#include "ZCameraFOVEffect.h"
+#include "ZCameraFOVEffectBase.h"
 
 #include <Glacier/ZEntity.h>
 #include <Glacier/ZSpatialEntity.h>
 
 #include "Helpers/Utils.h"
 
-constexpr float32 c_ZoomFOV = 10.0f;
-constexpr float32 c_WideFOV = 120.0f;
 const std::string c_CameraFOVPropertyName = "m_fFovYDeg";
 
-void ZCameraFOVEffect::Start()
+void ZCameraFOVEffectBase::Start()
 {
     ZCameraEffectBase::Start();
     ZInterpolatingEffectBase::Start();
@@ -17,19 +15,19 @@ void ZCameraFOVEffect::Start()
     m_fOriginalFOV = -1.0f;
 }
 
-void ZCameraFOVEffect::Stop()
+void ZCameraFOVEffectBase::Stop()
 {
     ZInterpolatingEffectBase::Stop();
     ZCameraEffectBase::Stop();
 }
 
-void ZCameraFOVEffect::OnClearScene()
+void ZCameraFOVEffectBase::OnClearScene()
 {
     ZCameraEffectBase::OnClearScene();
     ZInterpolatingEffectBase::OnClearScene();
 }
 
-void ZCameraFOVEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining)
+void ZCameraFOVEffectBase::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining)
 {
     ZInterpolatingEffectBase::OnFrameUpdate(p_UpdateEvent, p_fEffectTimeRemaining);
 
@@ -57,7 +55,7 @@ void ZCameraFOVEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, cons
         m_fOriginalFOV = *GetOriginalCameraEntity().GetProperty<float32>(c_CameraFOVPropertyName).As<float32>();
     }
 
-    auto s_fTargetFOV = (m_eType == EType::WideFOV) ? c_WideFOV : c_ZoomFOV;
+    auto s_fTargetFOV = m_fTargetFOV;
 
     // interpolation
     s_fTargetFOV = Utils::Interpolate(m_fOriginalFOV, s_fTargetFOV, GetInterpolationPoint());

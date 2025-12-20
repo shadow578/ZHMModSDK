@@ -16,6 +16,11 @@ public:
 
     void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining) override;
 
+    std::string GetDisplayName() override
+    {
+        return "GTA1 Mode";
+    }
+
 private:
     float32 GetMaxOverheadZAt(const SMatrix& p_Position, const float32 p_fMax);
 };

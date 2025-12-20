@@ -15,7 +15,7 @@
 
 #include <array>
 
-#include "Effects/ZCameraFOVEffect.h"
+#include "Effects/ZCameraFOVEffects.h"
 #include "Effects/ZExplodeRandomActorEffect.h"
 #include "Effects/ZFakeCrashEffect.h"
 #include "Effects/ZFlipCameraEffect.h"
@@ -38,9 +38,9 @@ ChaosMod::ChaosMod() : m_bMenuActive(false),
                        m_EffectTimer(std::bind(&ChaosMod::TriggerRandomChaosModule, this), 30.0)
 {
     m_aEffects = std::vector<IChaosEffect*>{
-        new ZCameraFOVEffect(ZCameraFOVEffect::EType::WideFOV),
-        new ZCameraFOVEffect(ZCameraFOVEffect::EType::ZoomFOV),
-        //new ZExplodeRandomActorEffect(),
+        new ZCameraZoomFOVEffect(),
+        new ZCameraWideFOVEffect(),
+        //FIXME: slow load new ZExplodeRandomActorEffect(),
         new ZFakeCrashEffect(),
         new ZFlipCameraEffect(),
         new ZLagEffect(),

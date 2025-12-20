@@ -15,4 +15,9 @@ public:
     void OnClearScene() override;
 
     void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining) override;
+
+    std::string GetDisplayName() override
+    {
+        return "Turn Turtle";
+    }
 };
