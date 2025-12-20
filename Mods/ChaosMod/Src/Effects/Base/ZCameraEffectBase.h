@@ -12,6 +12,8 @@ public:
     void OnClearScene() override;
     void OnDrawDebugUI() override;
 
+    bool Available() override;
+
 protected:
     inline ZEntityRef GetEffectCameraEntity() const
     {
@@ -35,4 +37,10 @@ private:
     bool m_bEffectCameraActive = false;
     ZEntityRef m_EffectCameraEntity;
     ZEntityRef m_OriginalCameraEntity;
+
+private: // single active enforcement
+    bool TakeCameraControl();
+    void ReleaseCameraControl();
+    bool CanTakeCameraControl();
+    bool HasCameraControl();
 };

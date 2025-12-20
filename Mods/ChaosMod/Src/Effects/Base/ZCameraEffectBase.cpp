@@ -20,6 +20,12 @@ void ZCameraEffectBase::Start()
         return;
     }
 
+    if (!TakeCameraControl())
+    {
+        Logger::Debug(TAG "Another camera effect is already active.");
+        return;
+    }
+
     m_bEffectCameraActive = SetActiveCamera(m_EffectCameraEntity, m_OriginalCameraEntity);
 }
 
@@ -38,6 +44,8 @@ void ZCameraEffectBase::Stop()
 
     m_bEffectCameraActive = false;
     m_OriginalCameraEntity = {};
+
+    ReleaseCameraControl();
 }
 
 void ZCameraEffectBase::OnClearScene()
@@ -52,6 +60,16 @@ void ZCameraEffectBase::OnDrawDebugUI()
     ImGui::TextUnformatted(fmt::format("Effect Camera Active: {}", m_bEffectCameraActive ? "Yes" : "No").c_str());
     ImGui::TextUnformatted(fmt::format("Effect Camera Entity: {}", m_EffectCameraEntity ? "Valid" : "Invalid").c_str());
     ImGui::TextUnformatted(fmt::format("Original Camera Entity: {}", m_OriginalCameraEntity ? "Valid" : "Invalid").c_str());
+}
+
+bool ZCameraEffectBase::Available()
+{
+    if (!HasCameraControl() && !CanTakeCameraControl())
+    {
+        return false;
+    }
+
+    return IChaosEffect::Available();
 }
 
 bool ZCameraEffectBase::EnsureCameraEntity()
@@ -142,4 +160,39 @@ bool ZCameraEffectBase::SetActiveCamera(ZEntityRef& p_NewCameraEntity, ZEntityRe
     p_PreviousCameraEntity = *s_RenderDestination.m_pInterfaceRef->GetSource();
     s_RenderDestination.m_pInterfaceRef->SetSource(&p_NewCameraEntity);
     return true;
+}
+
+
+// single active enforcement
+// this will (hopefully) fix issues where the effect camera remains active
+// after the effect has ended.
+static ZCameraEffectBase* s_pCurrentCameraEffect = nullptr;
+
+bool ZCameraEffectBase::TakeCameraControl()
+{
+    if (CanTakeCameraControl())
+    {
+        s_pCurrentCameraEffect = this;
+        return true;
+    }
+
+    return false;
+}
+
+void ZCameraEffectBase::ReleaseCameraControl()
+{
+    if (HasCameraControl())
+    {
+        s_pCurrentCameraEffect = nullptr;
+    }
+}
+
+bool ZCameraEffectBase::CanTakeCameraControl()
+{
+    return s_pCurrentCameraEffect == nullptr;
+}
+
+bool ZCameraEffectBase::HasCameraControl()
+{
+    return s_pCurrentCameraEffect == this;
 }
