@@ -1,13 +1,11 @@
-#include "ZPlayerRagdollEffect.h"
+#include "ZPlayerRagdollEffectBase.h"
 
 #include "IPluginInterface.h"
 #include "Functions.h"
 
 #include <Glacier/ZHitman5.h>
 
-#include "EffectRegistry.h"
-
-void ZPlayerRagdollEffect::Start()
+void ZPlayerRagdollEffectBase::Start()
 {
     auto s_Player = SDK()->GetLocalPlayer();
     if (!s_Player.m_pInterfaceRef)
@@ -15,10 +13,24 @@ void ZPlayerRagdollEffect::Start()
         return;
     }
 
-    Functions::ZHM5BaseCharacter_ActivateRagdoll->Call(s_Player.m_pInterfaceRef, false);
+    if (m_bPowered)
+    {
+        Functions::ZHM5BaseCharacter_ActivatePoweredRagdoll->Call(
+            s_Player.m_pInterfaceRef,
+            0,
+            false,
+            true,
+            0,
+            true
+        );
+    }
+    else
+    {
+        Functions::ZHM5BaseCharacter_ActivateRagdoll->Call(s_Player.m_pInterfaceRef, false);
+    }
 }
 
-void ZPlayerRagdollEffect::Stop()
+void ZPlayerRagdollEffectBase::Stop()
 {
     auto s_Player = SDK()->GetLocalPlayer();
     if (!s_Player.m_pInterfaceRef)
@@ -38,10 +50,12 @@ void ZPlayerRagdollEffect::Stop()
     }
 }
 
-bool ZPlayerRagdollEffect::Available()
+bool ZPlayerRagdollEffectBase::Available()
 {
-    return Functions::ZHM5BaseCharacter_ActivateRagdoll->Exists() &&
+
+    return (m_bPowered ?
+        Functions::ZHM5BaseCharacter_ActivatePoweredRagdoll->Exists() :
+        Functions::ZHM5BaseCharacter_ActivateRagdoll->Exists()
+        ) &&
         Functions::ZHM5BaseCharacter_DeactivateRagdoll->Exists();
 }
-
-REGISTER_CHAOS_EFFECT(ZPlayerRagdollEffect)
