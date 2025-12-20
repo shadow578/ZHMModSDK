@@ -17,14 +17,25 @@ void ZCameraFOVEffectBase::Start()
 
 void ZCameraFOVEffectBase::Stop()
 {
-    ZInterpolatingEffectBase::Stop();
     ZCameraEffectBase::Stop();
+    ZInterpolatingEffectBase::Stop();
 }
 
 void ZCameraFOVEffectBase::OnClearScene()
 {
     ZCameraEffectBase::OnClearScene();
     ZInterpolatingEffectBase::OnClearScene();
+}
+
+void ZCameraFOVEffectBase::OnDrawDebugUI()
+{
+    ImGui::TextUnformatted(fmt::format("Target FOV: {:.2f}", m_fTargetFOV).c_str());
+
+    ImGui::SeparatorText("ZCameraEffectBase");
+    ZCameraEffectBase::OnDrawDebugUI();
+
+    ImGui::SeparatorText("ZInterpolatingEffectBase");
+    ZInterpolatingEffectBase::OnDrawDebugUI();
 }
 
 void ZCameraFOVEffectBase::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining)

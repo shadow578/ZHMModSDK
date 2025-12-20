@@ -17,14 +17,23 @@ void ZOverheadCameraEffect::Start()
 
 void ZOverheadCameraEffect::Stop()
 {
-    ZInterpolatingEffectBase::Stop();
     ZCameraEffectBase::Stop();
+    ZInterpolatingEffectBase::Stop();
 }
 
 void ZOverheadCameraEffect::OnClearScene()
 {
     ZCameraEffectBase::OnClearScene();
     ZInterpolatingEffectBase::OnClearScene();
+}
+
+void ZOverheadCameraEffect::OnDrawDebugUI()
+{
+    ImGui::SeparatorText("ZCameraEffectBase");
+    ZCameraEffectBase::OnDrawDebugUI();
+
+    ImGui::SeparatorText("ZInterpolatingEffectBase");
+    ZInterpolatingEffectBase::OnDrawDebugUI();
 }
 
 void ZOverheadCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining)

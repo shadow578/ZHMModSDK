@@ -13,6 +13,7 @@ public:
     void Start() override;
     void Stop() override;
     void OnClearScene() override;
+    void OnDrawDebugUI() override;
 
     void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining) override;
 

@@ -25,8 +25,16 @@ void ZCameraEffectBase::Start()
 
 void ZCameraEffectBase::Stop()
 {
+    if (!m_OriginalCameraEntity)
+    {
+        return;
+    }
+
     ZEntityRef dummy;
-    SetActiveCamera(m_OriginalCameraEntity, dummy);
+    if (!SetActiveCamera(m_OriginalCameraEntity, dummy))
+    {
+        Logger::Error(TAG "Could not restore original camera entity.");
+    }
 
     m_bEffectCameraActive = false;
     m_OriginalCameraEntity = {};
@@ -37,6 +45,13 @@ void ZCameraEffectBase::OnClearScene()
     m_bEffectCameraActive = false;
     m_EffectCameraEntity = {};
     m_OriginalCameraEntity = {};
+}
+
+void ZCameraEffectBase::OnDrawDebugUI()
+{
+    ImGui::TextUnformatted(fmt::format("Effect Camera Active: {}", m_bEffectCameraActive ? "Yes" : "No").c_str());
+    ImGui::TextUnformatted(fmt::format("Effect Camera Entity: {}", m_EffectCameraEntity ? "Valid" : "Invalid").c_str());
+    ImGui::TextUnformatted(fmt::format("Original Camera Entity: {}", m_OriginalCameraEntity ? "Valid" : "Invalid").c_str());
 }
 
 bool ZCameraEffectBase::EnsureCameraEntity()
@@ -105,9 +120,9 @@ bool ZCameraEffectBase::EnsureCameraEntity()
     return true;
 }
 
-bool ZCameraEffectBase::SetActiveCamera(ZEntityRef& p_pNewCameraEntity, ZEntityRef& p_pPreviousCameraEntity)
+bool ZCameraEffectBase::SetActiveCamera(ZEntityRef& p_NewCameraEntity, ZEntityRef& p_PreviousCameraEntity)
 {
-    if (!p_pNewCameraEntity)
+    if (!p_NewCameraEntity)
     {
         return false;
     }
@@ -124,7 +139,7 @@ bool ZCameraEffectBase::SetActiveCamera(ZEntityRef& p_pNewCameraEntity, ZEntityR
         return false;
     }
 
-    p_pPreviousCameraEntity = *s_RenderDestination.m_pInterfaceRef->GetSource();
-    s_RenderDestination.m_pInterfaceRef->SetSource(&p_pNewCameraEntity);
+    p_PreviousCameraEntity = *s_RenderDestination.m_pInterfaceRef->GetSource();
+    s_RenderDestination.m_pInterfaceRef->SetSource(&p_NewCameraEntity);
     return true;
 }

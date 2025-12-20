@@ -13,14 +13,23 @@ void ZFlipCameraEffect::Start()
 
 void ZFlipCameraEffect::Stop()
 {
-    ZInterpolatingEffectBase::Stop();
     ZCameraEffectBase::Stop();
+    ZInterpolatingEffectBase::Stop();
 }
 
 void ZFlipCameraEffect::OnClearScene()
 {
     ZCameraEffectBase::OnClearScene();
     ZInterpolatingEffectBase::OnClearScene();
+}
+
+void ZFlipCameraEffect::OnDrawDebugUI()
+{
+    ImGui::SeparatorText("ZCameraEffectBase");
+    ZCameraEffectBase::OnDrawDebugUI();
+
+    ImGui::SeparatorText("ZInterpolatingEffectBase");
+    ZInterpolatingEffectBase::OnDrawDebugUI();
 }
 
 void ZFlipCameraEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining)

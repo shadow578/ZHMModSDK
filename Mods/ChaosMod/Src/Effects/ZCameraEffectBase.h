@@ -10,6 +10,7 @@ public:
     void Start() override;
     void Stop() override;
     void OnClearScene() override;
+    void OnDrawDebugUI() override;
 
 protected:
     inline ZEntityRef GetEffectCameraEntity() const
@@ -29,7 +30,7 @@ protected:
 
 private:
     bool EnsureCameraEntity();
-    bool SetActiveCamera(ZEntityRef& p_pNewCameraEntity, ZEntityRef& p_pPreviousCameraEntity);
+    bool SetActiveCamera(ZEntityRef& p_NewCameraEntity, ZEntityRef& p_PreviousCameraEntity);
 
     bool m_bEffectCameraActive = false;
     ZEntityRef m_EffectCameraEntity;
