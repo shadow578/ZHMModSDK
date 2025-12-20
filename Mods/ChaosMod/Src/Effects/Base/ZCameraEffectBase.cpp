@@ -53,6 +53,8 @@ void ZCameraEffectBase::OnClearScene()
     m_bEffectCameraActive = false;
     m_EffectCameraEntity = {};
     m_OriginalCameraEntity = {};
+
+    ReleaseCameraControl();
 }
 
 void ZCameraEffectBase::OnDrawDebugUI()

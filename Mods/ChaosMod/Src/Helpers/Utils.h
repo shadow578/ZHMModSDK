@@ -26,6 +26,18 @@ namespace Utils
     }
 
     template <typename T>
+    static T SelectRandomElement(const std::vector<T>& p_aElements)
+    {
+        if (p_aElements.empty())
+        {
+            throw std::runtime_error("SelectRandomElement called with empty vector.");
+        }
+
+        const auto s_Index = GetRandomNumber<size_t>(0, p_aElements.size() - 1);
+        return p_aElements[s_Index];
+    }
+
+    template <typename T>
     static T Interpolate(const T& p_A, const T& p_B, const float32 p_fT)
     {
         if (p_fT <= 0.0f)
@@ -45,4 +57,11 @@ namespace Utils
     ZActor* GetRandomActor(const bool p_bRequireAlive);
 
     bool TeleportPlayerTo(const SMatrix p_Position);
+
+    /**
+     * Set player outfit by common name (e.g. "CHAR_Reward_Chlorine_Hero_M_Flamingo_Suit_PRO167217").
+     * Only works for Outfits with CharacterType "HeroA".
+     * p_OutfitOut will be set to the OutfitKit that was applied to the player, assuming the function returns true.
+     */
+    bool SetPlayerOutfit(const std::string& p_sCommonName, TEntityRef<ZGlobalOutfitKit> &p_OutfitOut);
 };
