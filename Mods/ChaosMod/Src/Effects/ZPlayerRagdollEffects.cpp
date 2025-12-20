@@ -10,7 +10,7 @@
 void ZPlayerRagdollWithImpulseEffect::Start()
 {
     auto s_Player = SDK()->GetLocalPlayer();
-    if (!s_Player.m_pInterfaceRef)
+    if (!s_Player)
     {
         return;
     }
@@ -27,6 +27,46 @@ void ZPlayerRagdollWithImpulseEffect::Start()
         1,
         false
     );
+
+    m_VelocityTracker.Reset();
+    m_bActive = true;
+}
+
+void ZPlayerRagdollWithImpulseEffect::Stop()
+{
+    ZPlayerRagdollEffectBase::Stop();
+
+    m_VelocityTracker.Reset();
+    m_bActive = false;
+}
+
+void ZPlayerRagdollWithImpulseEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining)
+{
+    if (!m_bActive)
+    {
+        return;
+    }
+
+    auto s_Player = SDK()->GetLocalPlayer();
+    if (!s_Player)
+    {
+        return;
+    }
+
+    m_VelocityTracker.Update(p_UpdateEvent, s_Player.m_ref);
+
+    if (m_VelocityTracker.IsVelocityValid() && m_VelocityTracker.GetVelocity() <= 0.5f)
+    {
+        Stop();
+    }
+}
+
+void ZPlayerRagdollWithImpulseEffect::OnDrawDebugUI()
+{
+    ImGui::TextUnformatted(fmt::format("Velocity: {:.2f}{}", 
+        m_VelocityTracker.GetVelocity(),
+        m_VelocityTracker.IsVelocityValid() ? "" : " (invalid)"
+    ).c_str());
 }
 
 REGISTER_CHAOS_EFFECT(ZPlayerSimpleRagdollEffect)

@@ -44,7 +44,7 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
         ImGui::ProgressBar(
             s_fRemainingToNext / m_EffectTimer.m_fIntervalSeconds,
             ImVec2(-1.0f, 0.0f),
-            fmt::format("Next Effect In: {:.1f} Seconds", s_fRemainingToNext).c_str());
+            fmt::format("Next Effect In {:.1f} Seconds", s_fRemainingToNext).c_str());
         ImGui::TextUnformatted(fmt::format("Last Effect: {}", (m_pLastEffect != nullptr) ? m_pLastEffect->GetDisplayName() : "None").c_str());
 
         if (!p_HasFocus)
