@@ -1,15 +1,12 @@
 #pragma once
 
-#include "IChaosEffect.h"
+#include "Base/ZExplosionEffectBase.h"
 
-#include "Glacier/ZMath.h"
-
-class ZExplodeRandomActorEffect : public IChaosEffect
+class ZExplodeRandomActorEffect : public ZExplosionEffectBase
 {
-    void OnEngineInitialized() override;
-    void OnDrawDebugUI() override;
-
+public:
     void Start() override;
+    void OnDrawDebugUI() override;
 
     std::string GetDisplayName() override
     {
@@ -17,6 +14,7 @@ class ZExplodeRandomActorEffect : public IChaosEffect
     }
 
 private:
+    bool m_bPreloadStarted = false;
     ZActor* m_pLastTarget = nullptr;
     SMatrix m_LastTargetPos;
 };

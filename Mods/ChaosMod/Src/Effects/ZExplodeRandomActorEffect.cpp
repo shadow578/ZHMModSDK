@@ -1,47 +1,44 @@
 #include "ZExplodeRandomActorEffect.h"
 
-#include "Glacier/ZMath.h"
-#include "Glacier/ZSpatialEntity.h"
+#include <Glacier/ZSpatialEntity.h>
 
 #include "EffectRegistry.h"
 #include "Helpers/Utils.h"
-#include "Helpers/ZExplosionHelper.h"
 
 #define TAG "[ZExplodeRandomActorEffect] "
 
-void ZExplodeRandomActorEffect::OnEngineInitialized()
-{
-    m_bIsAvailable = ZExplosionHelper::PreloadResources();
-}
 
 void ZExplodeRandomActorEffect::Start()
 {
-    ZActor *s_Actor = Utils::GetRandomActor(true);
-    if (!s_Actor)
+    m_pLastTarget = Utils::GetRandomActor(true);
+    if (!m_pLastTarget)
     {
         Logger::Warn(TAG "No actor found to explode!");
         return;
     }
 
     ZEntityRef s_EntityRef;
-    s_Actor->GetID(s_EntityRef);
+    m_pLastTarget->GetID(s_EntityRef);
+    if (!s_EntityRef)
+    {
+        return;
+    }
 
-    ZSpatialEntity *s_ActorSpatialEntity = s_EntityRef.QueryInterface<ZSpatialEntity>();
-    auto s_ActorPos = s_ActorSpatialEntity->GetWorldMatrix();
+    const auto* s_pActorSpatial = s_EntityRef.QueryInterface<ZSpatialEntity>();
+    if (!s_pActorSpatial)
+    {
+        return;
+    }
 
     // offset a bit upwards so it doesn't clip into the ground
-    s_ActorPos.Trans.z += 0.25f;
+    m_LastTargetPos = s_pActorSpatial->GetWorldMatrix();
+    m_LastTargetPos.Trans.z += 0.25f;
 
-    // FIXME: yes, this leaks memory. no, i don't care.
-    auto s_Explosion = new ZExplosionHelper();
-    s_Explosion->SetPosition(s_ActorPos);
-    s_Explosion->SetDeathContext(EDeathContext::eDC_ACCIDENT);
-    s_Explosion->SetDeathType(EDeathType::eDT_BLOODY_KILL);
-    s_Explosion->Trigger();
 
-    Logger::Info(TAG "Actor '{}' goes boom!", s_Actor->m_sActorName);
-    m_pLastTarget = s_Actor;
-    m_LastTargetPos = s_ActorPos;
+    SExplosionParams s_ExplosionParams{
+        .m_Position = m_LastTargetPos,
+    };
+    SpawnExplosion(s_ExplosionParams);
 }
 
 void ZExplodeRandomActorEffect::OnDrawDebugUI()
@@ -54,11 +51,13 @@ void ZExplodeRandomActorEffect::OnDrawDebugUI()
 
     ImGui::TextUnformatted(fmt::format("Last Target: {}", s_LastTargetName).c_str());
 
-    if (ImGui::Button("Teleport to last target site"))
+    if (ImGui::Button("Teleport to last site"))
     {
         Utils::TeleportPlayerTo(m_LastTargetPos);
     }
+
+    ImGui::SeparatorText("ZExplosionEffectBase");
+    ZExplosionEffectBase::OnDrawDebugUI();
 }
 
-// FIXME load is slow:
-// REGISTER_CHAOS_EFFECT(ZExplodeRandomActorEffect)
+REGISTER_CHAOS_EFFECT(ZExplodeRandomActorEffect)
