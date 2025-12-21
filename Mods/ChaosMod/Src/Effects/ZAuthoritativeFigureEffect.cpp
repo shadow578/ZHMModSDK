@@ -19,7 +19,7 @@ ZAuthoritativeFigureEffect::ZAuthoritativeFigureEffect() : m_bOriginalAuthorityF
         //"CHAR_Reward_Sapienza_Hero_SuperFan_PRO",              // "Super Fan" - Ghostly Mask
         "CHAR_Global_Hero_EasterDuck_M",                       // Weird Duck Mask
         "CHAR_Reward_Hero_HalloweenOutfit_M_PRO140008",        // Scarecrow w/ Pumpkin Head
-        "Paris_Unique_VampireMagician_M_HPA914",               // Vampire Magician (Paris)
+        //"Paris_Unique_VampireMagician_M_HPA914",               // Vampire Magician (Paris)
         "Stingray_Unique_PirateOutfit_M",                      // Pirate (Ambrose)
         "CHAR_Reward_Hero_Bellini_Eminem_M",                   // Eminem (Bellini Contract 12.2025)
     };
@@ -46,6 +46,11 @@ void ZAuthoritativeFigureEffect::Start()
 
 void ZAuthoritativeFigureEffect::Stop()
 {
+    if (!m_SelectedOutfit)
+    {
+        return;
+    }
+
     m_SelectedOutfit.m_pInterfaceRef->m_bAuthorityFigure = m_bOriginalAuthorityFigure;
     m_SelectedOutfit.m_pInterfaceRef->m_bWeaponsAllowed = m_bOriginalWeaponsAllowed;
 }
