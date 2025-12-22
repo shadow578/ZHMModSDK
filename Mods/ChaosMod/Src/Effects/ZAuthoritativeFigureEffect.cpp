@@ -20,7 +20,7 @@ ZAuthoritativeFigureEffect::ZAuthoritativeFigureEffect() : m_bOriginalAuthorityF
         "CHAR_Global_Hero_EasterDuck_M",                       // Weird Duck Mask
         "CHAR_Reward_Hero_HalloweenOutfit_M_PRO140008",        // Scarecrow w/ Pumpkin Head
         //"Paris_Unique_VampireMagician_M_HPA914",               // Vampire Magician (Paris)
-        "Stingray_Unique_PirateOutfit_M",                      // Pirate (Ambrose)
+        //"Stingray_Unique_PirateOutfit_M",                      // Pirate (Ambrose)
         "CHAR_Reward_Hero_Bellini_Eminem_M",                   // Eminem (Bellini Contract 12.2025)
     };
 }

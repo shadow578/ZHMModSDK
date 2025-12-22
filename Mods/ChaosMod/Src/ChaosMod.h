@@ -28,6 +28,8 @@ private:
 private:
     bool m_bMenuActive = false;
 
+    void OnLoadOrClearScene();
+
 private: // Selection & Countdown logic
     struct SActiveEffect
     {

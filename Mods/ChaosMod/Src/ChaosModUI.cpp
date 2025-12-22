@@ -59,11 +59,17 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
         for (const auto& s_ActiveEffect : m_aActiveEffects)
         {
             const float32 s_fPercentRemaining = s_ActiveEffect.m_fTimeRemaining / s_ActiveEffect.m_fDuration;
-            ImGui::ProgressBar(
-                s_fPercentRemaining,
-                ImVec2(-1.0f, 0.0f),
-                fmt::format("{} - {:.1f}", s_ActiveEffect.m_pEffect->GetDisplayName(false), s_ActiveEffect.m_fTimeRemaining).c_str()
-            );
+            ImGui::BulletText(s_ActiveEffect.m_pEffect->GetDisplayName(false).c_str());
+
+            if (s_ActiveEffect.m_pEffect->GetDuration() != IChaosEffect::EDuration::OneShot)
+            {
+                ImGui::SameLine();
+                ImGui::ProgressBar(
+                    s_fPercentRemaining,
+                    ImVec2(-1.0f, 0.0f),
+                    fmt::format("{:.1f}", s_ActiveEffect.m_fTimeRemaining).c_str()
+                );
+            }
         }
 
         if (!p_HasFocus)
@@ -76,14 +82,29 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
 
         ImGui::SeparatorText("Settings");
 
-        ImGui::Checkbox("Enable", &m_EffectTimer.m_bEnable);
+        if (ImGui::Checkbox("Enabled", &m_EffectTimer.m_bEnable))
+        {
+            if (m_EffectTimer.m_bEnable)
+            {
+                // enabled, init first vote
+                m_aCurrentVote.clear();
+                OnEffectTimerTrigger();
+            }
+        }
+
+
+        ImGui::TextUnformatted("Chaos Interval");
+        ImGui::SameLine();
         ImGui::SliderFloat(
-            "Chaos Interval (Seconds)",
+            "",
             &m_EffectTimer.m_fIntervalSeconds,
             5.0,
             120.0);
+
+        ImGui::TextUnformatted("Effect Duration");
+        ImGui::SameLine();
         ImGui::SliderFloat(
-            "Effect Duration",
+            "",
             &m_fFullEffectDuration,
             5.0,
             120.0

@@ -101,17 +101,28 @@ void ChaosMod::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
             s_Effect->OnFrameUpdate(p_UpdateEvent, s_fEffectRemainingTime);
         }
     }
+
+    UpdateEffectExpiration(p_UpdateEvent.m_GameTimeDelta.ToSeconds());
+}
+
+void ChaosMod::OnLoadOrClearScene()
+{
+    m_EffectTimer.m_bEnable = false;
+
+    m_aCurrentVote.clear();
+    m_aActiveEffects.clear();
 }
 
 DEFINE_PLUGIN_DETOUR(ChaosMod, void, OnLoadScene, ZEntitySceneContext* th, SSceneInitParameters&)
 {
-    m_EffectTimer.m_bEnable = false;
+    OnLoadOrClearScene();
     return HookResult<void>(HookAction::Continue());
 }
 
 DEFINE_PLUGIN_DETOUR(ChaosMod, void, OnClearScene, ZEntitySceneContext* th, bool p_FullyUnloadScene)
 {
-    m_EffectTimer.m_bEnable = false;
+    OnLoadOrClearScene();
+
     for (auto& s_Effect : EffectRegistry::GetInstance().GetEffects())
     {
         if (s_Effect && s_Effect->Available())

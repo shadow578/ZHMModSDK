@@ -98,7 +98,7 @@ public:
      * Check whether "other" can be activated or active at the same 
      * time as this effect without causing issues.
      */
-    virtual bool IsCompatibleWith(const IChaosEffect* p_pOther) const { return this == p_pOther; }
+    virtual bool IsCompatibleWith(const IChaosEffect* p_pOther) const { return this != p_pOther; }
 
     /**
      * Get the internal name of the effect, e.g. for debug menu and settings.

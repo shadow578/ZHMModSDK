@@ -16,7 +16,7 @@ void ChaosMod::OnEffectTimerTrigger()
     // if no vote, only prepare the next one
     if (!m_aCurrentVote.empty())
     {
-        // TODO: if social voting was implemented, votes processing would go here
+        // TODO: if social voting was to be implemented, votes processing would go here
         auto s_pSelectedEffect = Utils::SelectRandomElement(m_aCurrentVote);
         ActivateEffect(s_pSelectedEffect);
 
