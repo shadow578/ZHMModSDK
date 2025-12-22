@@ -14,7 +14,6 @@ public:
     }
 
 private:
-    bool m_bPreloadStarted = false;
     ZActor* m_pLastTarget = nullptr;
     SMatrix m_LastTargetPos;
 };
