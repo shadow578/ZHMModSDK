@@ -14,7 +14,10 @@
 
 #define TAG "[ChaosMod] "
 
-ChaosMod::ChaosMod() : m_EffectTimer(std::bind(&ChaosMod::TriggerRandomChaosModule, this), 30.0)
+ChaosMod::ChaosMod() : 
+    m_fFullEffectDuration(60.0f),
+    m_nVoteOptions(4),
+    m_EffectTimer(std::bind(&ChaosMod::OnEffectTimerTrigger, this), 30.0)
 {
 
 }
@@ -23,6 +26,15 @@ ChaosMod::~ChaosMod()
 {
     Hooks::ZEntitySceneContext_LoadScene->RemoveDetour(&ChaosMod::OnLoadScene);
     Hooks::ZEntitySceneContext_ClearScene->RemoveDetour(&ChaosMod::OnClearScene);
+
+    for (auto& s_Effect : EffectRegistry::GetInstance().GetEffects())
+    {
+        if (s_Effect && s_Effect->Available())
+        {
+            Logger::Debug(TAG "Forwarding OnModUnload to '{}'", s_Effect->GetName());
+            s_Effect->OnModUnload();
+        }
+    }
 }
 
 void ChaosMod::Init()
@@ -66,61 +78,29 @@ void ChaosMod::OnEngineInitialized()
 
 void ChaosMod::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
 {
-    const auto s_fTimeRemaining = m_EffectTimer.m_fIntervalSeconds - m_EffectTimer.GetElapsedSeconds();
     for (auto& s_Effect : EffectRegistry::GetInstance().GetEffects())
     {
         if (s_Effect && s_Effect->Available())
         {
             auto s_fEffectRemainingTime = 0.0f;
+            for (auto &s_ActiveEffect : m_aActiveEffects)
+            {
+                if (s_ActiveEffect.m_pEffect == s_Effect.get())
+                {
+                    s_fEffectRemainingTime = s_ActiveEffect.m_fTimeRemaining;
+                    break;
+                }
+            }
 
             // debug takes precedence
             if (s_Effect.get() == m_pEffectForDebug)
             {
                 s_fEffectRemainingTime = m_fDebugEffectRemainingTime;
             }
-            else if (s_Effect.get() == m_pLastEffect)
-            {
-                s_fEffectRemainingTime = s_fTimeRemaining;
-            }
 
             s_Effect->OnFrameUpdate(p_UpdateEvent, s_fEffectRemainingTime);
         }
     }
-}
-
-void ChaosMod::TriggerRandomChaosModule()
-{
-    // stop previous effect
-    if (m_pLastEffect)
-    {
-        m_pLastEffect->Stop();
-    }
-
-    // get and trigger the next effect
-    auto& s_aEffects = EffectRegistry::GetInstance().GetEffects();
-    if (EffectRegistry::GetInstance().GetEffects().size() == 0)
-    {
-        Logger::Error(TAG "No effects loaded to trigger.");
-        return;
-    }
-
-    for (int t = 0; t < 10; t++)
-    {
-        const size_t s_nEffectIndex = Utils::GetRandomNumber<size_t>(0, s_aEffects.size() - 1);
-        m_pLastEffect = s_aEffects[s_nEffectIndex].get();
-        if (m_pLastEffect && m_pLastEffect->Available())
-        {
-            break;
-        }
-    }
-
-    if (!m_pLastEffect)
-    {
-        return;
-    }
-
-    Logger::Info(TAG "Triggering '{}'", m_pLastEffect->GetName());
-    m_pLastEffect->Start();
 }
 
 DEFINE_PLUGIN_DETOUR(ChaosMod, void, OnLoadScene, ZEntitySceneContext* th, SSceneInitParameters&)

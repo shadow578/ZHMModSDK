@@ -10,6 +10,8 @@ public:
     void Start() override;
     void Stop() override;
 
+    bool IsCompatibleWith(const IChaosEffect* p_pOther) const override;
+
 private:
     const SVector3 m_vGravity;
 

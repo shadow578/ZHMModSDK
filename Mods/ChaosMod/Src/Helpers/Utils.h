@@ -52,6 +52,12 @@ namespace Utils
         return p_A + (p_B - p_A) * p_fT;
     }
 
+    template <typename Base, typename T>
+    static bool IsInstanceOf(const T* p_pOther)
+    {
+        return dynamic_cast<const Base*>(p_pOther) != nullptr;
+    }
+
     SMatrix InterpolateAffine(const SMatrix& p_A, const SMatrix& p_B, const float32 p_fT);
 
     std::vector<ZActor*> GetActors(const bool p_bIncludeDead, const bool p_bIncludePacified);

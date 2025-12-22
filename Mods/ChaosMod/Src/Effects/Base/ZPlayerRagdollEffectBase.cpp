@@ -5,6 +5,8 @@
 
 #include <Glacier/ZHitman5.h>
 
+#include "Helpers/Utils.h"
+
 void ZPlayerRagdollEffectBase::Start()
 {
     auto s_Player = SDK()->GetLocalPlayer();
@@ -58,4 +60,11 @@ bool ZPlayerRagdollEffectBase::Available()
         Functions::ZHM5BaseCharacter_ActivateRagdoll->Exists()
         ) &&
         Functions::ZHM5BaseCharacter_DeactivateRagdoll->Exists();
+}
+
+bool ZPlayerRagdollEffectBase::IsCompatibleWith(const IChaosEffect* p_pOther) const
+{
+    return IChaosEffect::IsCompatibleWith(p_pOther)
+        // all ragdoll effects are incompatible with each other
+        && !Utils::IsInstanceOf<ZPlayerRagdollEffectBase>(p_pOther);
 }

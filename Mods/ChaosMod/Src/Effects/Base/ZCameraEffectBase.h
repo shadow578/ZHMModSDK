@@ -13,6 +13,7 @@ public:
     void OnDrawDebugUI() override;
 
     bool Available() override;
+    bool IsCompatibleWith(const IChaosEffect* p_pOther) const override;
 
 protected:
     inline ZEntityRef GetEffectCameraEntity() const

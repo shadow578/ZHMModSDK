@@ -11,11 +11,35 @@
 class IChaosEffect
 {
 public:
+    enum class EDuration
+    {
+        /**
+         * Effect has no persistent effect. 
+         */
+        OneShot,
+
+        /**
+         * Persistent Effectr running for shortened (1/2) duration.
+         */
+        Short,
+
+        /**
+         * Persistent Effect running for full duration. 
+         */
+        Full
+    };
+
     /**
      * Called when the mod itself is initialized. 
      * Forwards @see IPluginInterface::Init
      */
     virtual void OnModInitialized() {};
+
+    /**
+     * Called when the mod itself unloads.
+     * Forwards @see IPluginInterface::~IPluginInterface
+     */
+    virtual void OnModUnload() {};
 
     /**
      * Called when the engine is fully initialized.
@@ -71,7 +95,13 @@ public:
     virtual bool Available() { return m_bIsAvailable; }
 
     /**
-     * Get the internal name of the effect, e.g. for debug menu.
+     * Check whether "other" can be activated or active at the same 
+     * time as this effect without causing issues.
+     */
+    virtual bool IsCompatibleWith(const IChaosEffect* p_pOther) const { return this == p_pOther; }
+
+    /**
+     * Get the internal name of the effect, e.g. for debug menu and settings.
      * Default implementation returns the C++ type name.
      */
     virtual std::string GetName();
@@ -80,8 +110,17 @@ public:
      * Get the display name of the effect, e.g. for enduser facing UI.
      * Default implementation returns @see IChaosEffect::GetName.
      */
-    virtual std::string GetDisplayName();
+    virtual std::string GetDisplayName(const bool p_bVoting) { return GetDisplayName(); }
+
+    /**
+     * Get for how long this effect should remain active.
+     * Duration does NOT affect calls to the effect, only how long it is remaining active.
+     * OneShot effects DO have Stop() called after some delay.
+     */
+    virtual EDuration GetDuration() { return EDuration::Full; }
 
 protected:
     bool m_bIsAvailable = true;
+
+    virtual std::string GetDisplayName() { return GetName(); }
 };

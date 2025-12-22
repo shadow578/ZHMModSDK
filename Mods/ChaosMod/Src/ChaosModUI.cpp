@@ -46,8 +46,25 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
         ImGui::ProgressBar(
             s_fRemainingToNext / m_EffectTimer.m_fIntervalSeconds,
             ImVec2(-1.0f, 0.0f),
-            fmt::format("Next Effect In {:.1f} Seconds", s_fRemainingToNext).c_str());
-        ImGui::TextUnformatted(fmt::format("Last Effect: {}", (m_pLastEffect != nullptr) ? m_pLastEffect->GetDisplayName() : "None").c_str());
+            fmt::format("Next Effect In {:.1f} Seconds", s_fRemainingToNext).c_str()
+        );
+
+        ImGui::SeparatorText("Current Vote");
+        for (const auto& s_Effect : m_aCurrentVote)
+        {
+            ImGui::BulletText(s_Effect->GetDisplayName(true).c_str());
+        }
+
+        ImGui::SeparatorText("Active Effects");
+        for (const auto& s_ActiveEffect : m_aActiveEffects)
+        {
+            const float32 s_fPercentRemaining = s_ActiveEffect.m_fTimeRemaining / s_ActiveEffect.m_fDuration;
+            ImGui::ProgressBar(
+                s_fPercentRemaining,
+                ImVec2(-1.0f, 0.0f),
+                fmt::format("{} - {:.1f}", s_ActiveEffect.m_pEffect->GetDisplayName(false), s_ActiveEffect.m_fTimeRemaining).c_str()
+            );
+        }
 
         if (!p_HasFocus)
         {
@@ -57,15 +74,26 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
             return;
         }
 
-        ImGui::Separator();
+        ImGui::SeparatorText("Settings");
 
-        ImGui::Checkbox("Enable Chaos", &m_EffectTimer.m_bEnable);
+        ImGui::Checkbox("Enable", &m_EffectTimer.m_bEnable);
         ImGui::SliderFloat(
             "Chaos Interval (Seconds)",
             &m_EffectTimer.m_fIntervalSeconds,
             5.0,
             120.0);
-        ImGui::Checkbox("Show Debug Menu", &m_bDebugMenuActive);
+        ImGui::SliderFloat(
+            "Effect Duration",
+            &m_fFullEffectDuration,
+            5.0,
+            120.0
+        );
+
+        if (ImGui::Button("Open Debug Menu"))
+        {
+            m_bDebugMenuActive = true;
+        }
+
         ImGui::TextUnformatted(fmt::format("Effects Loaded: {}", EffectRegistry::GetInstance().GetEffects().size()).c_str());
     }
 
@@ -130,7 +158,7 @@ void ChaosMod::DrawDebugWindow()
 void ChaosMod::DrawEffectDebugPane()
 {
     ImGui::TextUnformatted(fmt::format("Name:         {}", m_pEffectForDebug->GetName()).c_str());
-    ImGui::TextUnformatted(fmt::format("Display Name: {}", m_pEffectForDebug->GetDisplayName()).c_str());
+    ImGui::TextUnformatted(fmt::format("Display Name: {} / {}", m_pEffectForDebug->GetDisplayName(false), m_pEffectForDebug->GetDisplayName(true)).c_str());
     ImGui::TextUnformatted(fmt::format("Available:    {}", m_pEffectForDebug->Available() ? "Yes" : "No").c_str());
 
     ImGui::BeginDisabled(!m_pEffectForDebug->Available());

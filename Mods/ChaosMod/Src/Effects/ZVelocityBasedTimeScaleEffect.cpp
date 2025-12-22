@@ -1,4 +1,5 @@
 #include "ZVelocityBasedTimeScaleEffect.h"
+#include "ZSlowTimeScaleEffect.h"
 
 #include "Globals.h"
 #include "IPluginInterface.h"
@@ -7,6 +8,7 @@
 #include <Glacier/SGameUpdateEvent.h>
 
 #include "EffectRegistry.h"
+#include "Helpers/Utils.h"
 
 
 ZVelocityBasedTimeScaleEffect::ZVelocityBasedTimeScaleEffect()
@@ -70,6 +72,13 @@ void ZVelocityBasedTimeScaleEffect::OnDrawDebugUI()
         0.0f,
         1.0f
     );
+}
+
+bool ZVelocityBasedTimeScaleEffect::IsCompatibleWith(const IChaosEffect* p_pOther) const
+{
+    return IChaosEffect::IsCompatibleWith(p_pOther)
+        // ZSlowTimeScaleEffect also modifies time scale, so not compatible
+        && !Utils::IsInstanceOf<ZSlowTimeScaleEffect>(p_pOther);
 }
 
 REGISTER_CHAOS_EFFECT(ZVelocityBasedTimeScaleEffect);

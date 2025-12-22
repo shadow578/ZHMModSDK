@@ -9,7 +9,6 @@
 
 #include <vector>
 
-
 class ChaosMod : public IPluginInterface
 {
 public:
@@ -26,13 +25,29 @@ private:
     DECLARE_PLUGIN_DETOUR(ChaosMod, void, OnLoadScene, ZEntitySceneContext*, SSceneInitParameters&);
     DECLARE_PLUGIN_DETOUR(ChaosMod, void, OnClearScene, ZEntitySceneContext* th, bool p_FullyUnloadScene);
 
-    void TriggerRandomChaosModule();
-
 private:
     bool m_bMenuActive = false;
 
+private: // Selection & Countdown logic
+    struct SActiveEffect
+    {
+        IChaosEffect* m_pEffect;
+        float32 m_fDuration;
+        float32 m_fTimeRemaining;
+    };
+
     ZTimer m_EffectTimer;
-    IChaosEffect* m_pLastEffect = nullptr;
+    float32 m_fFullEffectDuration;
+    int m_nVoteOptions;
+
+    std::vector <IChaosEffect*> m_aCurrentVote;
+    std::vector<SActiveEffect> m_aActiveEffects;
+
+    void OnEffectTimerTrigger();
+    void ActivateEffect(IChaosEffect* p_pEffect);
+    void UpdateEffectExpiration(const float32 p_fDeltaTime);
+    std::vector<IChaosEffect*> GetRandomEffectSelection(const int p_nCount);
+    bool IsCompatibleWithAllActive(const IChaosEffect* p_pEffect);
 
 private: // Debug
     void DrawDebugWindow();

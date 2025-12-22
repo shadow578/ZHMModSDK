@@ -13,8 +13,3 @@ std::string IChaosEffect::GetName()
 
     return s_Name;
 }
-
-std::string IChaosEffect::GetDisplayName()
-{
-    return GetName();
-}

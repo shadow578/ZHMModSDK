@@ -14,6 +14,8 @@ public:
     void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining) override;
     void OnDrawDebugUI() override;
 
+    bool IsCompatibleWith(const IChaosEffect* p_pOther) const override;
+
     std::string GetDisplayName() override
     {
         return "SUPERHOT";

@@ -8,6 +8,8 @@
 
 #include "Logging.h"
 
+#include "Helpers/Utils.h"
+
 
 #define TAG "[ZCameraEffectBase] "
 
@@ -72,6 +74,13 @@ bool ZCameraEffectBase::Available()
     }
 
     return IChaosEffect::Available();
+}
+
+bool ZCameraEffectBase::IsCompatibleWith(const IChaosEffect* p_pOther) const
+{
+    return IChaosEffect::IsCompatibleWith(p_pOther) 
+        // all camera effects are incompatible with each other
+        && !Utils::IsInstanceOf<ZCameraEffectBase>(p_pOther);
 }
 
 bool ZCameraEffectBase::EnsureCameraEntity()

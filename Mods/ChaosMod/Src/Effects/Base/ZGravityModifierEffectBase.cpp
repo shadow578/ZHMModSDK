@@ -3,6 +3,8 @@
 #include "IPluginInterface.h"
 #include "Logging.h"
 
+#include "Helpers/Utils.h"
+
 #define TAG "[ZGravityModifierEffectBase] "
 
 /**
@@ -38,4 +40,11 @@ void ZGravityModifierEffectBase::SetGravity(const SVector3 p_vGravity)
             Logger::Debug(TAG "Failed to set gravity property on PhysicsWorld entity.");
         }
     }
+}
+
+bool ZGravityModifierEffectBase::IsCompatibleWith(const IChaosEffect* p_pOther) const
+{
+    return IChaosEffect::IsCompatibleWith(p_pOther)
+        // all gravity modifiers are incompatible with each other
+        && !Utils::IsInstanceOf<ZGravityModifierEffectBase>(p_pOther);
 }

@@ -11,6 +11,7 @@ public:
     void Stop() override;
 
     bool Available() override;
+    bool IsCompatibleWith(const IChaosEffect* p_pOther) const override;
 
 private:
     const bool m_bPowered;
