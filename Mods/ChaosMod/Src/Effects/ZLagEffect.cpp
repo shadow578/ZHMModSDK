@@ -3,6 +3,7 @@
 #include <Glacier/SGameUpdateEvent.h>
 
 #include "EffectRegistry.h"
+#include "Helpers/ImGuiExtras.h"
 
 void ZLagEffect::Start()
 {
@@ -43,7 +44,7 @@ void ZLagEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const floa
 
 void ZLagEffect::OnDrawDebugUI()
 {
-    ImGui::SliderFloat("Target FPS", &m_fTargetFPS, 1.0f, 30.0f);
+    ImGui::DragFloat("Target FPS", &m_fTargetFPS, 1.0f, 30.0f);
 }
 
 REGISTER_CHAOS_EFFECT(ZLagEffect, 5.0f)

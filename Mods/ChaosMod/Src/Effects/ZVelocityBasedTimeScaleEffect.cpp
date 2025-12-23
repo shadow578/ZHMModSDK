@@ -9,6 +9,7 @@
 
 #include "EffectRegistry.h"
 #include "Helpers/Utils.h"
+#include "Helpers/ImGuiExtras.h"
 
 
 ZVelocityBasedTimeScaleEffect::ZVelocityBasedTimeScaleEffect()
@@ -66,7 +67,7 @@ void ZVelocityBasedTimeScaleEffect::OnDrawDebugUI()
         m_VelocityTracker.IsVelocityValid() ? "" : " (invalid)"
     ).c_str());
 
-    ImGui::SliderFloat(
+    ImGuiEx::DragFloat(
         "Velocity to Time Scale Factor",
         &m_fVelocityToTimeScaleFactor,
         0.0f,

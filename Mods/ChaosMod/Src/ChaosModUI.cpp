@@ -6,9 +6,24 @@
 #include <imgui_internal.h>
 
 #include "EffectRegistry.h"
+#include "Helpers/ImGuiExtras.h"
 
 #define TAG "[ChaosModUI] "
 
+std::string EffectDurationToString(const IChaosEffect::EDuration p_Duration)
+{
+    switch (p_Duration)
+    {
+    case IChaosEffect::EDuration::OneShot:
+        return "One-Shot";
+    case IChaosEffect::EDuration::Short:
+        return "Short";
+    case IChaosEffect::EDuration::Full:
+        return "Full";
+    default:
+        return "<INVALID>";
+    }
+}
 
 void ChaosMod::OnDrawMenu()
 {
@@ -86,7 +101,7 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
         {
             if (m_EffectTimer.m_bEnable)
             {
-                // enabled, init first vote
+                // on enable, prepare first vote
                 m_aCurrentVote.clear();
                 OnEffectTimerTrigger();
             }
@@ -95,16 +110,20 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
 
         ImGui::TextUnformatted("Chaos Interval");
         ImGui::SameLine();
-        ImGui::SliderFloat(
-            "",
+
+        const float32 p_fMinInterval = 5.0f;
+        const float32 p_fMaxInterval = 120.0f;
+
+        ImGuiEx::DragFloat(
+            "##Chaos Interval",
             &m_EffectTimer.m_fIntervalSeconds,
-            5.0,
-            120.0);
+            5.0f,
+            120.0f);
 
         ImGui::TextUnformatted("Effect Duration");
         ImGui::SameLine();
-        ImGui::SliderFloat(
-            "",
+        ImGuiEx::DragFloat(
+            "##Effect Duration",
             &m_fFullEffectDuration,
             5.0,
             120.0
@@ -181,6 +200,7 @@ void ChaosMod::DrawEffectDebugPane()
     ImGui::TextUnformatted(fmt::format("Name:         {}", m_pEffectForDebug->GetName()).c_str());
     ImGui::TextUnformatted(fmt::format("Display Name: {} / {}", m_pEffectForDebug->GetDisplayName(false), m_pEffectForDebug->GetDisplayName(true)).c_str());
     ImGui::TextUnformatted(fmt::format("Available:    {}", m_pEffectForDebug->Available() ? "Yes" : "No").c_str());
+    ImGui::TextUnformatted(fmt::format("Duration:     {}", EffectDurationToString(m_pEffectForDebug->GetDuration())).c_str());
 
     ImGui::BeginDisabled(!m_pEffectForDebug->Available());
     if (ImGui::Button("Start() now"))
@@ -196,17 +216,41 @@ void ChaosMod::DrawEffectDebugPane()
         m_pEffectForDebug->Stop();
     }
 
-    if (ImGui::Button("0.5 Seconds Remaining"))
+    ImGui::TextUnformatted("Debug Effect Remaining Time:");
+    ImGui::SameLine();
+    if (ImGui::Button("0.5 s"))
     {
         m_fDebugEffectRemainingTime = 0.5f;
     }
-
-    ImGui::SliderFloat(
-        "Debug Effect Remaining Time (Seconds)",
+    ImGui::SameLine();
+    ImGuiEx::DragFloat(
+        "##Debug Effect Remaining",
         &m_fDebugEffectRemainingTime,
         0.0f,
         60.0f
     );
+
+    if (ImGui::Button("Print Compatibility"))
+    {
+        Logger::Info(TAG "Compatibility for A='{}':", m_pEffectForDebug->GetName());
+        for (const auto& s_pOtherEffect : EffectRegistry::GetInstance().GetEffects())
+        {
+            constexpr int c_nNamePadding = 30;
+
+            auto s_sOtherName = s_pOtherEffect->GetName();
+            s_sOtherName.resize(c_nNamePadding, ' ');
+            
+            const auto s_bCompatibleA = m_pEffectForDebug->IsCompatibleWith(s_pOtherEffect.get());
+            const auto s_bCompatibleB = s_pOtherEffect->IsCompatibleWith(m_pEffectForDebug);
+
+            Logger::Info(
+                TAG " - with B='{}':\t\t A>B={} \t| B>A={}",
+                s_sOtherName,
+                s_bCompatibleA ? "Compatible" : "Incompatible",
+                s_bCompatibleB ? "Compatible" : "Incompatible"
+            );
+        }
+    }
 
     ImGui::EndDisabled();
 

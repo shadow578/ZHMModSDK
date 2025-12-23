@@ -14,7 +14,7 @@ public:
     enum class EDuration
     {
         /**
-         * Effect has no persistent effect. 
+         * Effect has no persistent effect.
          */
         OneShot,
 
@@ -24,7 +24,7 @@ public:
         Short,
 
         /**
-         * Persistent Effect running for full duration. 
+         * Persistent Effect running for full duration.
          */
         Full
     };
