@@ -3,6 +3,7 @@
 #include "IChaosEffect.h"
 
 #include <Glacier/ZEntity.h>
+#include <Glacier/ZCameraEntity.h>
 
 class ZCameraEffectBase : public virtual IChaosEffect
 {
@@ -12,7 +13,6 @@ public:
     void OnClearScene() override;
     void OnDrawDebugUI() override;
 
-    bool Available() override;
     bool IsCompatibleWith(const IChaosEffect* p_pOther) const override;
 
 protected:
@@ -33,15 +33,13 @@ protected:
 
 private:
     bool EnsureCameraEntity();
-    bool SetActiveCamera(ZEntityRef& p_NewCameraEntity, ZEntityRef& p_PreviousCameraEntity);
+
+    bool GetRenderDestinationEntity(TEntityRef<IRenderDestinationEntity>& p_RenderDestinationEntity);
+    bool GetActiveCamera(ZEntityRef& p_ActiveCameraEntity);
+    bool SetActiveCamera(ZEntityRef& p_NewCameraEntity);
+    bool IsMainHitmanCamera(ZEntityRef& p_CameraEntity);
 
     bool m_bEffectCameraActive = false;
     ZEntityRef m_EffectCameraEntity;
     ZEntityRef m_OriginalCameraEntity;
-
-private: // single active enforcement
-    bool TakeCameraControl();
-    void ReleaseCameraControl();
-    bool CanTakeCameraControl();
-    bool HasCameraControl();
 };

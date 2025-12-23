@@ -2,7 +2,6 @@
 
 #include <Globals.h>
 #include <Glacier/ZModule.h>
-#include <Glacier/ZCameraEntity.h>
 #include <Glacier/ZScene.h>
 #include <Glacier/SExternalReferences.h>
 
@@ -10,8 +9,10 @@
 
 #include "Helpers/Utils.h"
 
-
 #define TAG "[ZCameraEffectBase] "
+
+constexpr uint64_t c_nMainHitmanCameraEntityId = 1520968122659560567;
+constexpr uint64_t c_nMainHitmanCameraOwningEntityId = 5884861939421351664;
 
 void ZCameraEffectBase::Start()
 {
@@ -22,13 +23,19 @@ void ZCameraEffectBase::Start()
         return;
     }
 
-    if (!TakeCameraControl())
+    if (!GetActiveCamera(m_OriginalCameraEntity))
     {
-        Logger::Debug(TAG "Another camera effect is already active.");
+        Logger::Error(TAG "Could not get active camera entity.");
         return;
     }
 
-    m_bEffectCameraActive = SetActiveCamera(m_EffectCameraEntity, m_OriginalCameraEntity);
+    if (!IsMainHitmanCamera(m_OriginalCameraEntity))
+    {
+        Logger::Error(TAG "Active camera entity is not the main Hitman camera, aborting");
+        return;
+    }
+
+    m_bEffectCameraActive = SetActiveCamera(m_EffectCameraEntity);
 }
 
 void ZCameraEffectBase::Stop()
@@ -38,16 +45,13 @@ void ZCameraEffectBase::Stop()
         return;
     }
 
-    ZEntityRef dummy;
-    if (!SetActiveCamera(m_OriginalCameraEntity, dummy))
+    if (!SetActiveCamera(m_OriginalCameraEntity))
     {
         Logger::Error(TAG "Could not restore original camera entity.");
     }
 
     m_bEffectCameraActive = false;
     m_OriginalCameraEntity = {};
-
-    ReleaseCameraControl();
 }
 
 void ZCameraEffectBase::OnClearScene()
@@ -55,8 +59,6 @@ void ZCameraEffectBase::OnClearScene()
     m_bEffectCameraActive = false;
     m_EffectCameraEntity = {};
     m_OriginalCameraEntity = {};
-
-    ReleaseCameraControl();
 }
 
 void ZCameraEffectBase::OnDrawDebugUI()
@@ -64,16 +66,6 @@ void ZCameraEffectBase::OnDrawDebugUI()
     ImGui::TextUnformatted(fmt::format("Effect Camera Active: {}", m_bEffectCameraActive ? "Yes" : "No").c_str());
     ImGui::TextUnformatted(fmt::format("Effect Camera Entity: {}", m_EffectCameraEntity ? "Valid" : "Invalid").c_str());
     ImGui::TextUnformatted(fmt::format("Original Camera Entity: {}", m_OriginalCameraEntity ? "Valid" : "Invalid").c_str());
-}
-
-bool ZCameraEffectBase::Available()
-{
-    if (!HasCameraControl() && !CanTakeCameraControl())
-    {
-        return false;
-    }
-
-    return IChaosEffect::Available();
 }
 
 bool ZCameraEffectBase::IsCompatibleWith(const IChaosEffect* p_pOther) const
@@ -149,7 +141,25 @@ bool ZCameraEffectBase::EnsureCameraEntity()
     return true;
 }
 
-bool ZCameraEffectBase::SetActiveCamera(ZEntityRef& p_NewCameraEntity, ZEntityRef& p_PreviousCameraEntity)
+bool ZCameraEffectBase::GetActiveCamera(ZEntityRef& p_ActiveCameraEntity)
+{
+    TEntityRef<IRenderDestinationEntity> s_RenderDestination;
+    if (!GetRenderDestinationEntity(s_RenderDestination))
+    {
+        return false;
+    }
+
+    auto s_pActiveCameraEntity = s_RenderDestination.m_pInterfaceRef->GetSource();
+    if (!s_pActiveCameraEntity)
+    {
+        return false;
+    }
+
+    p_ActiveCameraEntity = *s_pActiveCameraEntity;
+    return true;
+}
+
+bool ZCameraEffectBase::SetActiveCamera(ZEntityRef& p_NewCameraEntity)
 {
     if (!p_NewCameraEntity)
     {
@@ -157,53 +167,56 @@ bool ZCameraEffectBase::SetActiveCamera(ZEntityRef& p_NewCameraEntity, ZEntityRe
     }
 
     TEntityRef<IRenderDestinationEntity> s_RenderDestination;
+    if (!GetRenderDestinationEntity(s_RenderDestination))
+    {
+        return false;
+    }
+
+    s_RenderDestination.m_pInterfaceRef->SetSource(&p_NewCameraEntity);
+    return true;
+}
+
+bool ZCameraEffectBase::IsMainHitmanCamera(ZEntityRef& p_CameraEntity)
+{
+    uint64_t s_nCameraEntityId = 0,
+        s_nOwningEntityId = 0;
+
+    // TODO: holy f this is ugly
+    if (const auto s_pCameraEntity = p_CameraEntity.GetEntity())
+    {
+        if (const auto s_pCameraEntityType = s_pCameraEntity->GetType())
+        {
+            s_nCameraEntityId = s_pCameraEntityType->m_nEntityId;
+        }
+
+        if (const auto s_OwningEntity = p_CameraEntity.GetOwningEntity())
+        {
+            if (const auto s_pOwningEntity = s_OwningEntity.GetEntity())
+            {
+                if (const auto s_pOwningEntityType = s_pOwningEntity->GetType())
+                {
+                    s_nOwningEntityId = s_pOwningEntityType->m_nEntityId;
+                }
+            }
+        }
+    }
+
+    return s_nCameraEntityId == c_nMainHitmanCameraEntityId && 
+        s_nOwningEntityId == c_nMainHitmanCameraOwningEntityId;
+}
+
+bool ZCameraEffectBase::GetRenderDestinationEntity(TEntityRef<IRenderDestinationEntity>& p_RenderDestinationEntity)
+{
     Functions::ZCameraManager_GetActiveRenderDestinationEntity->Call(
         Globals::CameraManager,
-        &s_RenderDestination
+        &p_RenderDestinationEntity
     );
 
-    if (!s_RenderDestination)
+    if (!p_RenderDestinationEntity)
     {
         Logger::Debug(TAG "No active render destination entity.");
         return false;
     }
 
-    p_PreviousCameraEntity = *s_RenderDestination.m_pInterfaceRef->GetSource();
-    s_RenderDestination.m_pInterfaceRef->SetSource(&p_NewCameraEntity);
     return true;
-}
-
-
-// single active enforcement
-// this will (hopefully) fix issues where the effect camera remains active
-// after the effect has ended.
-static ZCameraEffectBase* s_pCurrentCameraEffect = nullptr;
-
-bool ZCameraEffectBase::TakeCameraControl()
-{
-    if (CanTakeCameraControl())
-    {
-        s_pCurrentCameraEffect = this;
-        return true;
-    }
-
-    return false;
-}
-
-void ZCameraEffectBase::ReleaseCameraControl()
-{
-    if (HasCameraControl())
-    {
-        s_pCurrentCameraEffect = nullptr;
-    }
-}
-
-bool ZCameraEffectBase::CanTakeCameraControl()
-{
-    return s_pCurrentCameraEffect == nullptr;
-}
-
-bool ZCameraEffectBase::HasCameraControl()
-{
-    return s_pCurrentCameraEffect == this;
 }
