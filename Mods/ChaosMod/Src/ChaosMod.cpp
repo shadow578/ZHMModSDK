@@ -58,6 +58,7 @@ void ChaosMod::Init()
 void ChaosMod::OnEngineInitialized()
 {
     m_EffectTimer.Initialize();
+    m_SlowUpdateTimer.Initialize();
 
     const ZMemberDelegate<ChaosMod, void(const SGameUpdateEvent&)> s_Delegate(this, &ChaosMod::OnFrameUpdate);
     Globals::GameLoopManager->RegisterFrameUpdate(s_Delegate, 1, EUpdateMode::eUpdatePlayMode);
