@@ -1,8 +1,8 @@
 #pragma once
-#include "Base/ZActorWellbeignChangeEffectBase.h"
+#include "Base/ZActorWellbeingChangeEffectBase.h"
 #include "Base/ZExplosionEffectBase.h"
 
-class ZExplosiveKnockoutEffect : public ZActorWellbeignChangeEffectBase, public ZExplosionEffectBase
+class ZExplosiveKnockoutEffect : public ZActorWellbeingChangeEffectBase, public ZExplosionEffectBase
 {
 public:
     std::string GetDisplayName() override

@@ -28,8 +28,8 @@ void ZTimer::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
 
     if (m_fElapsedSeconds >= m_fIntervalSeconds)
     {
-        m_fElapsedSeconds = 0;
         m_Callback();
+        m_fElapsedSeconds = 0;
     }
 }
 

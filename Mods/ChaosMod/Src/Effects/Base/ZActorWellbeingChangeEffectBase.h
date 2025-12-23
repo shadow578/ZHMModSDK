@@ -6,12 +6,12 @@
 
 #include <map>
 
-class ZActorWellbeignChangeEffectBase : public virtual IChaosEffect
+class ZActorWellbeingChangeEffectBase : public virtual IChaosEffect
 {
 public:
     void Start() override;
     void Stop() override;
-    void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining) override;
+    void OnSlowUpdate(const float32 p_fDeltaTime, const float32 p_fEffectTimeRemaining) override;
 
 protected:
     struct SActorState

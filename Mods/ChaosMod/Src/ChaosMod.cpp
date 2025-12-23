@@ -17,7 +17,8 @@
 ChaosMod::ChaosMod() : 
     m_fFullEffectDuration(60.0f),
     m_nVoteOptions(4),
-    m_EffectTimer(std::bind(&ChaosMod::OnEffectTimerTrigger, this), 30.0)
+    m_EffectTimer(std::bind(&ChaosMod::OnEffectTimerTrigger, this), 30.0),
+    m_SlowUpdateTimer(std::bind(&ChaosMod::OnEffectSlowUpdate, this), 0.2, true) // ~5 FPS
 {
 
 }
@@ -82,23 +83,7 @@ void ChaosMod::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
     {
         if (s_Effect && s_Effect->Available())
         {
-            auto s_fEffectRemainingTime = 0.0f;
-            for (auto &s_ActiveEffect : m_aActiveEffects)
-            {
-                if (s_ActiveEffect.m_pEffect == s_Effect.get())
-                {
-                    s_fEffectRemainingTime = s_ActiveEffect.m_fTimeRemaining;
-                    break;
-                }
-            }
-
-            // debug takes precedence
-            if (s_Effect.get() == m_pEffectForDebug)
-            {
-                s_fEffectRemainingTime = m_fDebugEffectRemainingTime;
-            }
-
-            s_Effect->OnFrameUpdate(p_UpdateEvent, s_fEffectRemainingTime);
+            s_Effect->OnFrameUpdate(p_UpdateEvent, GetEffectRemainingTime(s_Effect.get()));
         }
     }
 
@@ -111,6 +96,39 @@ void ChaosMod::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
 
         m_qDeferredFrameUpdateActions.pop();
     }
+}
+
+void ChaosMod::OnEffectSlowUpdate()
+{
+    const float s_fDeltaTime = m_SlowUpdateTimer.GetElapsedSeconds();
+
+    for (auto& s_Effect : EffectRegistry::GetInstance().GetEffects())
+    {
+        if (s_Effect && s_Effect->Available())
+        {
+            s_Effect->OnSlowUpdate(s_fDeltaTime, GetEffectRemainingTime(s_Effect.get()));
+        }
+    }
+}
+
+float32 ChaosMod::GetEffectRemainingTime(const IChaosEffect* p_pEffect) const
+{
+    // debug takes precedence
+    if (p_pEffect == m_pEffectForDebug)
+    {
+        return m_fDebugEffectRemainingTime;
+    }
+
+    for (const auto& s_ActiveEffect : m_aActiveEffects)
+    {
+        if (s_ActiveEffect.m_pEffect == p_pEffect)
+        {
+            return s_ActiveEffect.m_fTimeRemaining;
+        }
+    }
+
+    // not active
+    return 0.0f;
 }
 
 void ChaosMod::OnLoadOrClearScene()

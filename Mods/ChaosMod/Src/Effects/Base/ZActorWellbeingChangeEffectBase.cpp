@@ -1,21 +1,21 @@
-#include "ZActorWellbeignChangeEffectBase.h"
+#include "ZActorWellbeingChangeEffectBase.h"
 
 #include "Helpers/Utils.h"
 
-void ZActorWellbeignChangeEffectBase::Start()
+void ZActorWellbeingChangeEffectBase::Start()
 {
     // note: next frame update will populate the initial states
     m_mLastActorStates.clear();
     m_bMonitorChanges = true;
 }
 
-void ZActorWellbeignChangeEffectBase::Stop()
+void ZActorWellbeingChangeEffectBase::Stop()
 {
     m_mLastActorStates.clear();
     m_bMonitorChanges = false;
 }
 
-void ZActorWellbeignChangeEffectBase::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining)
+void ZActorWellbeingChangeEffectBase::OnSlowUpdate(const float32 p_fDeltaTime, const float32 p_fEffectTimeRemaining)
 {
     if (!m_bMonitorChanges)
     {

@@ -61,6 +61,15 @@ public:
     virtual void OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining) {};
 
     /**
+     * Called during frame update during play mode (not when paused), but at a lower frequency.
+     * Expected to be called at least every 0.5 seconds.
+     * Effects that need to do more expensive operations regularly should do so here instead of in OnFrameUpdate.
+     * @param p_fDeltaTime Game time delta since the last call, in seconds.
+     * @param p_fEffectTimeRemaining Time remaining for the effect in seconds, or 0 if effect is inactive.
+     */
+    virtual void OnSlowUpdate(const float32 p_fDeltaTime, const float32 p_fEffectTimeRemaining) {};
+
+    /**
      * Called for drawing effect-specific UI in the ZHMModSDK menu, allowing 
      * effects to create custom windows.
      * Forwards @see IPluginInterface::OnDrawUI
