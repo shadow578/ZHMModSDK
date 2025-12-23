@@ -209,7 +209,7 @@ static ZQuickEntityLoader g_ExplosionProp(
 );
 #pragma endregion
 
-void ZExplosionEffectBase::OnEngineInitialized()
+void ZExplosionEffectBase::LoadResources()
 {
     g_ExplosionProp.LoadAsync();
 }
@@ -217,9 +217,7 @@ void ZExplosionEffectBase::OnEngineInitialized()
 bool ZExplosionEffectBase::Available()
 {
     return IChaosEffect::Available() &&
-        // if Available() returns false, OnEngineInitialized() will not be called, so 
-        // we need to ensure we only check load status once it was started
-        (!g_ExplosionProp.Loading() || g_ExplosionProp.Ready());
+        g_ExplosionProp.Ready();
 }
 
 void ZExplosionEffectBase::OnDrawDebugUI()

@@ -124,7 +124,7 @@ static ZQuickEntityLoader g_SFXPlayerProp(
 #pragma endregion
 
 
-void ZSoundFXEffectBase::OnEngineInitialized()
+void ZSoundFXEffectBase::LoadResources()
 {
     g_SFXPlayerProp.LoadAsync();
 }
@@ -132,9 +132,7 @@ void ZSoundFXEffectBase::OnEngineInitialized()
 bool ZSoundFXEffectBase::Available()
 {
     return IChaosEffect::Available() &&
-        // if Available() returns false, OnEngineInitialized() will not be called, so 
-        // we need to ensure we only check load status once it was started
-        (!g_SFXPlayerProp.Loading() || g_SFXPlayerProp.Ready());
+        g_SFXPlayerProp.Ready();
 }
 
 void ZSoundFXEffectBase::OnDrawDebugUI()

@@ -7,7 +7,7 @@
 class ZPoisonAOEDamageEffectBase : public virtual IChaosEffect
 {
 public:
-    void OnEngineInitialized() override;
+    void LoadResources() override;
     bool Available() override;
     void OnDrawDebugUI() override;
 

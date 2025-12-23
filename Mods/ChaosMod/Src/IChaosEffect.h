@@ -30,7 +30,7 @@ public:
     };
 
     /**
-     * Called when the mod itself is initialized. 
+     * Called when the mod itself is initialized.
      * Forwards @see IPluginInterface::Init
      */
     virtual void OnModInitialized() {};
@@ -70,7 +70,7 @@ public:
     virtual void OnSlowUpdate(const float32 p_fDeltaTime, const float32 p_fEffectTimeRemaining) {};
 
     /**
-     * Called for drawing effect-specific UI in the ZHMModSDK menu, allowing 
+     * Called for drawing effect-specific UI in the ZHMModSDK menu, allowing
      * effects to create custom windows.
      * Forwards @see IPluginInterface::OnDrawUI
      */
@@ -98,13 +98,23 @@ public:
     /**
      * Check whether the effect is available to be used.
      * Unavailable effects will not be selected by the ChaosMod.
-     * No functions except for @see IChaosEffect::Available, 
-     * @see IChaosEffect::GetName and @see IChaosEffect::GetDisplayName may be called.
+     * No functions except for @see IChaosEffect::Available,
+     * @see IChaosEffect::GetName, @see IChaosEffect::GetDisplayName, 
+     * @see LoadResources may be called.
      */
     virtual bool Available() { return m_bIsAvailable; }
 
     /**
-     * Check whether "other" can be activated or active at the same 
+     * Called at a suitable time for loading of dynamic resources to occur.
+     * At this point, the engine is initialized (after OnEngineInitialized).
+     * A Scene may or may not be loaded at this point.
+     * Any calls to @see ZQuickEntityLoader::Load or @see ZQuickEntityLoader::LoadAsync should occur here.
+     * Note that LoadResources may be called multiple times during the mod's lifetime.
+     */
+    virtual void LoadResources() {};
+
+    /**
+     * Check whether "other" can be activated or active at the same
      * time as this effect without causing issues.
      */
     virtual bool IsCompatibleWith(const IChaosEffect* p_pOther) const { return this != p_pOther; }

@@ -14,7 +14,7 @@ DEFINE_PLUGIN_DETOUR(SkipIntro, void, OnLoadScene, ZEntitySceneContext* th, SSce
         Logger::Debug("+ With brick: {}", s_Brick);
 
     if (p_parameters.m_SceneResource == "assembly:/_PRO/Scenes/Frontend/Boot.entity")
-        p_parameters.m_SceneResource = "assembly:/_PRO/Scenes/Missions/Paris/_Scene_FashionShowHit_01.entity"; // "assembly:/_PRO/Scenes/Frontend/MainMenu.entity";
+        p_parameters.m_SceneResource = "assembly:/_PRO/Scenes/Frontend/MainMenu.entity";
 
     return HookResult<void>(HookAction::Continue());
 }

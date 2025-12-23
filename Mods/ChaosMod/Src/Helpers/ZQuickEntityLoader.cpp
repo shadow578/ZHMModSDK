@@ -19,7 +19,7 @@ ZQuickEntityLoader::~ZQuickEntityLoader()
 }
 
 void ZQuickEntityLoader::LoadAsync()
-{
+{   
     bool s_bExpected = false;
     if (!m_bIsStarted.compare_exchange_strong(s_bExpected, true))
     {
@@ -31,10 +31,17 @@ void ZQuickEntityLoader::LoadAsync()
     m_LoadThread = std::thread(&ZQuickEntityLoader::Load, this);
     m_bIsReady.store(false, std::memory_order_release);
     m_bHasFailed.store(false, std::memory_order_release);
+    
 }
 
 void ZQuickEntityLoader::Load()
 {
+    if (Ready() || Failed())
+    {
+        // already loaded, abort
+        return;
+    }
+
     m_bIsStarted.store(true, std::memory_order_release);
 
     Logger::Debug(TAG "Loading Factory '{}' from QN", m_sName);

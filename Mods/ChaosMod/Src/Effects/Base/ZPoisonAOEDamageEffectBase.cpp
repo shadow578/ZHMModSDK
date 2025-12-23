@@ -614,7 +614,7 @@ static ZQuickEntityLoader g_AOECloudProp(
 );
 #pragma endregion
 
-void ZPoisonAOEDamageEffectBase::OnEngineInitialized()
+void ZPoisonAOEDamageEffectBase::LoadResources()
 {
     g_AOECloudProp.LoadAsync();
 }
@@ -622,9 +622,7 @@ void ZPoisonAOEDamageEffectBase::OnEngineInitialized()
 bool ZPoisonAOEDamageEffectBase::Available()
 {
     return IChaosEffect::Available() &&
-        // if Available() returns false, OnEngineInitialized() will not be called, so 
-        // we need to ensure we only check load status once it was started
-        (!g_AOECloudProp.Loading() || g_AOECloudProp.Ready());
+        g_AOECloudProp.Ready();
 }
 
 void ZPoisonAOEDamageEffectBase::OnDrawDebugUI()

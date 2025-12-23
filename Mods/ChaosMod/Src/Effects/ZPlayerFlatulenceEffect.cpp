@@ -7,10 +7,10 @@
 
 #include "EffectRegistry.h"
 
-void ZPlayerFlatulenceEffect::OnEngineInitialized() 
+void ZPlayerFlatulenceEffect::LoadResources() 
 {
-    ZPoisonAOEDamageEffectBase::OnEngineInitialized();
-    ZSoundFXEffectBase::OnEngineInitialized();
+    ZPoisonAOEDamageEffectBase::LoadResources();
+    ZSoundFXEffectBase::LoadResources();
 }
 
 void ZPlayerFlatulenceEffect::OnDrawDebugUI() 

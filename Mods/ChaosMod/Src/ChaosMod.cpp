@@ -14,7 +14,7 @@
 
 #define TAG "[ChaosMod] "
 
-ChaosMod::ChaosMod() : 
+ChaosMod::ChaosMod() :
     m_fFullEffectDuration(60.0f),
     m_nVoteOptions(4),
     m_EffectTimer(std::bind(&ChaosMod::OnEffectTimerTrigger, this), 30.0),
@@ -27,6 +27,7 @@ ChaosMod::~ChaosMod()
 {
     Hooks::ZEntitySceneContext_LoadScene->RemoveDetour(&ChaosMod::OnLoadScene);
     Hooks::ZEntitySceneContext_ClearScene->RemoveDetour(&ChaosMod::OnClearScene);
+    Hooks::ZEntitySceneContext_SetLoadingStage->RemoveDetour(&ChaosMod::OnSetLoadingStage);
 
     for (auto& s_Effect : EffectRegistry::GetInstance().GetEffects())
     {
@@ -42,6 +43,7 @@ void ChaosMod::Init()
 {
     Hooks::ZEntitySceneContext_LoadScene->AddDetour(this, &ChaosMod::OnLoadScene);
     Hooks::ZEntitySceneContext_ClearScene->AddDetour(this, &ChaosMod::OnClearScene);
+    Hooks::ZEntitySceneContext_SetLoadingStage->AddDetour(this, &ChaosMod::OnSetLoadingStage);
 
     for (auto& s_Effect : EffectRegistry::GetInstance().GetEffects())
     {
@@ -131,6 +133,20 @@ float32 ChaosMod::GetEffectRemainingTime(const IChaosEffect* p_pEffect) const
     return 0.0f;
 }
 
+void ChaosMod::LoadEffectResources()
+{
+    for (auto& s_Effect : EffectRegistry::GetInstance().GetEffects())
+    {
+        // note s_Effect->Available() is not checked, as OnPreloadResources explicitly is allowed
+        // to run for unavailable effects
+        if (s_Effect)
+        {
+            Logger::Info(TAG "Loading Resources for '{}'", s_Effect->GetName());
+            s_Effect->LoadResources();
+        }
+    }
+}
+
 void ChaosMod::OnLoadOrClearScene()
 {
     m_EffectTimer.m_bEnable = false;
@@ -156,6 +172,22 @@ DEFINE_PLUGIN_DETOUR(ChaosMod, void, OnClearScene, ZEntitySceneContext* th, bool
             Logger::Debug(TAG "Forwarding OnClearScene to '{}'", s_Effect->GetName());
             s_Effect->OnClearScene();
         }
+    }
+
+    return HookResult<void>(HookAction::Continue());
+}
+
+DEFINE_PLUGIN_DETOUR(ChaosMod, void, OnSetLoadingStage, ZEntitySceneContext* th, ESceneLoadingStage stage)
+{
+    // preload resources after assets are loaded in a level.
+    // loading to early (in OnEngineInit or menu screens) can cause some issues with resource loading,
+    // leading to crashes.
+    const std::string s_sSceneResource = th->GetSceneInitParameters().m_SceneResource.c_str();
+    const bool s_bIsMenu = s_sSceneResource == "assembly:/_PRO/Scenes/Frontend/Boot.entity"
+        || s_sSceneResource == "assembly:/_PRO/Scenes/Frontend/MainMenu.entity";
+    if (!s_bIsMenu && stage == ESceneLoadingStage::eLoading_AssetsLoaded)
+    {
+        LoadEffectResources();
     }
 
     return HookResult<void>(HookAction::Continue());

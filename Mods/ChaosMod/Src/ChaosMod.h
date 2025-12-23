@@ -26,6 +26,7 @@ public:
 private:
     DECLARE_PLUGIN_DETOUR(ChaosMod, void, OnLoadScene, ZEntitySceneContext*, SSceneInitParameters&);
     DECLARE_PLUGIN_DETOUR(ChaosMod, void, OnClearScene, ZEntitySceneContext* th, bool p_FullyUnloadScene);
+    DECLARE_PLUGIN_DETOUR(ChaosMod, void, OnSetLoadingStage, ZEntitySceneContext* th, ESceneLoadingStage stage);
 
 private: // misc.
     bool m_bMenuActive = false;
@@ -33,7 +34,9 @@ private: // misc.
     std::queue<std::function<void()>> m_qDeferredFrameUpdateActions;
 
     void OnEffectSlowUpdate();
-    
+
+    void LoadEffectResources();
+
     void OnLoadOrClearScene();
     float32 GetEffectRemainingTime(const IChaosEffect* p_pEffect) const;
 
