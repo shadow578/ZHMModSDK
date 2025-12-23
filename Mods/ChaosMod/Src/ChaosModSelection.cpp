@@ -18,6 +18,20 @@ void ChaosMod::OnEffectTimerTrigger()
     {
         // TODO: if social voting was to be implemented, votes processing would go here
         auto s_pSelectedEffect = Utils::SelectRandomElement(m_aCurrentVote);
+
+        // fallback to randomly selected effect if selected is unavailable
+        // no compatibility check here, as there should only be compatible effects in the vote
+        // this should be fairly rare
+        if (!s_pSelectedEffect->Available())
+        {
+            Logger::Warn(TAG "Selected effect '{}' is no longer available, selecting random fallback.", s_pSelectedEffect->GetName());
+            const auto s_aFallbacks = GetRandomEffectSelection(1);
+            if (!s_aFallbacks.empty())
+            {
+                s_pSelectedEffect = s_aFallbacks[0];
+            }
+        }
+
         ActivateEffect(s_pSelectedEffect);
 
         m_aCurrentVote.clear();
@@ -29,7 +43,7 @@ void ChaosMod::OnEffectTimerTrigger()
 
 void ChaosMod::ActivateEffect(IChaosEffect* p_pEffect)
 {
-    if (!p_pEffect)
+    if (!p_pEffect || !p_pEffect->Available())
     {
         return;
     }
