@@ -15,6 +15,11 @@ class ZSwapPlayerWithActorEffect : public IChaosEffect
         return "Swap Player with Random Actor";
     }
 
+    EDuration GetDuration() override
+    {
+        return EDuration::OneShot;
+    }
+
 private:
     SMatrix m_PreviousPlayerPosition;
 };

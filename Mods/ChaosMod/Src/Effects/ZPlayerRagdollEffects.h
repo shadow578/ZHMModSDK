@@ -12,6 +12,11 @@ public:
     {
         return "Ragdoll Player";
     }
+
+    EDuration GetDuration() override
+    {
+        return EDuration::Short; // boring if too long
+    }
 };
 
 class ZPlayerPoweredRagdollEffect : public ZPlayerRagdollEffectBase
@@ -38,6 +43,12 @@ public:
     std::string GetDisplayName() override
     {
         return "Super Stunt";
+    }
+
+    EDuration GetDuration() override
+    {
+        // while there's a persistent effect, it's cancelled after the "stunt"
+        return EDuration::OneShot;
     }
 
 private:

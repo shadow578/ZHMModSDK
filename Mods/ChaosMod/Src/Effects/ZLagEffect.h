@@ -20,6 +20,11 @@ public:
         return "Console Experience";
     }
 
+    EDuration GetDuration() override
+    {
+        return EDuration::Short; // painful!
+    }
+
 private:
     float32 m_fTargetFPS;
     bool m_bEnabled = false;

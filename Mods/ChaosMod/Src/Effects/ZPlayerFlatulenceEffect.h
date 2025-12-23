@@ -13,4 +13,9 @@ class ZPlayerFlatulenceEffect : public ZPoisonAOEDamageEffectBase, public ZSound
     {
         return "Flatulence";
     }
+
+    EDuration GetDuration() override
+    {
+        return EDuration::OneShot;
+    }
 };

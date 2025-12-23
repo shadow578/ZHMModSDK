@@ -13,6 +13,11 @@ public:
     {
         return "Binoculars";
     }
+
+    EDuration GetDuration() override
+    {
+        return EDuration::Short; // painful!
+    }
 };
 
 class ZCameraWideFOVEffect : public ZCameraFOVEffectBase
@@ -25,6 +30,11 @@ public:
     std::string GetDisplayName() override
     {
         return "Quake PRO";
+    }
+
+    EDuration GetDuration() override
+    {
+        return EDuration::Full;
     }
 };
 

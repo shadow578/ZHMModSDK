@@ -6,9 +6,14 @@ class ZFakeCrashEffect : public IChaosEffect
 {
     void Start() override;
 
-    std::string GetDisplayName() override
+    std::string GetDisplayName(const bool p_bVoting) override
     {
-        return "Fake Crash";
+        return p_bVoting ? "???" : "Fake Crash";
+    }
+
+    EDuration GetDuration() override
+    {
+        return EDuration::OneShot;
     }
 
 private:

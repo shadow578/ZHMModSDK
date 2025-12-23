@@ -11,6 +11,7 @@ public:
     void Stop() override;
 
     std::string GetDisplayName() override;
+    EDuration GetDuration() override;
 
 private:
     float32 m_fTargetTimeScale = 0.2f;

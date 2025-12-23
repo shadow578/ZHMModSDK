@@ -21,4 +21,9 @@ public:
     {
         return "Turn Turtle";
     }
+
+    EDuration GetDuration() override
+    {
+        return EDuration::Short; // painful!
+    }
 };

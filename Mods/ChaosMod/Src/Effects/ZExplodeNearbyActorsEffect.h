@@ -16,6 +16,11 @@ public:
         return "Obliterate All Nearby Actors";
     }
 
+    EDuration GetDuration() override
+    {
+        return EDuration::OneShot;
+    }
+
 private:
     std::vector<ZActor*> GetNearbyActors(const float4& p_Center, const float32 p_fRadius);
 };

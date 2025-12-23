@@ -13,6 +13,11 @@ public:
         return "Random Actor Goes Boom";
     }
 
+    EDuration GetDuration() override
+    {
+        return EDuration::OneShot;
+    }
+
 private:
     ZActor* m_pLastTarget = nullptr;
     SMatrix m_LastTargetPos;

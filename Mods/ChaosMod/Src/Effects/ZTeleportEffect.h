@@ -14,6 +14,11 @@ class ZTeleportEffect : public IChaosEffect
         return "Teleport Player";
     }
 
+    EDuration GetDuration() override
+    {
+        return EDuration::OneShot;
+    }
+
 private:
     enum class ETeleportDirection
     {

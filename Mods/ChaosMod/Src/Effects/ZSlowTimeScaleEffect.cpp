@@ -22,4 +22,10 @@ std::string ZSlowTimeScaleEffect::GetDisplayName()
     return fmt::format("{:.1f}x Game Speed", m_fTargetTimeScale);
 }
 
+IChaosEffect::EDuration ZSlowTimeScaleEffect::GetDuration()
+{
+    // slower than normal -> short duration
+    return (m_fTargetTimeScale < 1.0f) ? EDuration::Short : EDuration::Full;
+}
+
 REGISTER_CHAOS_EFFECT(ZSlowTimeScaleEffect, 0.2);
