@@ -103,6 +103,14 @@ void ChaosMod::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent)
     }
 
     UpdateEffectExpiration(p_UpdateEvent.m_GameTimeDelta.ToSeconds());
+
+    while (!m_qDeferredFrameUpdateActions.empty())
+    {
+        const auto& s_Action = m_qDeferredFrameUpdateActions.front();
+        s_Action();
+
+        m_qDeferredFrameUpdateActions.pop();
+    }
 }
 
 void ChaosMod::OnLoadOrClearScene()

@@ -8,6 +8,8 @@
 #include "IChaosEffect.h"
 
 #include <vector>
+#include <queue>
+#include <functional>
 
 class ChaosMod : public IPluginInterface
 {
@@ -27,6 +29,7 @@ private:
 
 private:
     bool m_bMenuActive = false;
+    std::queue<std::function<void()>> m_qDeferredFrameUpdateActions;
 
     void OnLoadOrClearScene();
 

@@ -205,15 +205,21 @@ void ChaosMod::DrawEffectDebugPane()
     ImGui::BeginDisabled(!m_pEffectForDebug->Available());
     if (ImGui::Button("Start() now"))
     {
-        Logger::Info(TAG "Calling Start() for '{}'", m_pEffectForDebug->GetName());
-        m_pEffectForDebug->Start();
-        m_fDebugEffectRemainingTime = 30.0f;
+        m_qDeferredFrameUpdateActions.push([this]()
+            {
+                Logger::Info(TAG "Calling Start() for '{}'", m_pEffectForDebug->GetName());
+                m_pEffectForDebug->Start();
+                m_fDebugEffectRemainingTime = 30.0f;
+            });
     }
 
     if (ImGui::Button("Stop() now"))
     {
-        Logger::Info(TAG "Calling Stop() for '{}'", m_pEffectForDebug->GetName());
-        m_pEffectForDebug->Stop();
+        m_qDeferredFrameUpdateActions.push([this]()
+            {
+                Logger::Info(TAG "Calling Stop() for '{}'", m_pEffectForDebug->GetName());
+                m_pEffectForDebug->Stop();
+            });
     }
 
     ImGui::TextUnformatted("Debug Effect Remaining Time:");
@@ -239,7 +245,7 @@ void ChaosMod::DrawEffectDebugPane()
 
             auto s_sOtherName = s_pOtherEffect->GetName();
             s_sOtherName.resize(c_nNamePadding, ' ');
-            
+
             const auto s_bCompatibleA = m_pEffectForDebug->IsCompatibleWith(s_pOtherEffect.get());
             const auto s_bCompatibleB = s_pOtherEffect->IsCompatibleWith(m_pEffectForDebug);
 
