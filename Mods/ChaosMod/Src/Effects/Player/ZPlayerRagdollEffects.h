@@ -1,5 +1,5 @@
 #pragma once
-#include "Base/ZPlayerRagdollEffectBase.h"
+#include "Effects/Base/ZPlayerRagdollEffectBase.h"
 
 #include "Helpers/ZVelocityTracker.h"
 

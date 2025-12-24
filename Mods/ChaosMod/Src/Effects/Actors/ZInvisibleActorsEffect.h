@@ -1,5 +1,5 @@
 #pragma once
-#include "ZMinimapNoActorsEffect.h"
+#include "Effects/UI/ZMinimapNoActorsEffect.h"
 
 // Note: derive from ZMinimapNoActorsEffect so we can reuse minimap hiding logic.
 // we don't want actors showing on the minimap if they're invisible.

@@ -1,6 +1,6 @@
 #pragma once
-#include "Base/ZPoisonAOEDamageEffectBase.h"
-#include "Base/ZSoundFXEffectBase.h"
+#include "Effects/Base/ZPoisonAOEDamageEffectBase.h"
+#include "Effects/Base/ZSoundFXEffectBase.h"
 
 class ZPlayerFlatulenceEffect : public ZPoisonAOEDamageEffectBase, public ZSoundFXEffectBase
 {

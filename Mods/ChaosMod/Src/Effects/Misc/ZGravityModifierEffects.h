@@ -1,5 +1,5 @@
 #pragma once
-#include "Base/ZGravityModifierEffectBase.h"
+#include "Effects/Base/ZGravityModifierEffectBase.h"
 
 class ZLowGravityEffect : public ZGravityModifierEffectBase
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Base/ZExplosionEffectBase.h"
+#include "Effects/Base/ZExplosionEffectBase.h"
 
 class ZExplodeRandomActorEffect : public ZExplosionEffectBase
 {

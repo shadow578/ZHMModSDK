@@ -1,5 +1,5 @@
 #pragma once
-#include "Base/ZExplosionEffectBase.h"
+#include "Effects/Base/ZExplosionEffectBase.h"
 
 #include <Glacier/ZMath.h>
 #include <Glacier/ZActor.h>
