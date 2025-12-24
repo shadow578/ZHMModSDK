@@ -28,4 +28,6 @@ IChaosEffect::EDuration ZSlowTimeScaleEffect::GetDuration()
     return (m_fTargetTimeScale < 1.0f) ? EDuration::Short : EDuration::Full;
 }
 
-REGISTER_CHAOS_EFFECT(ZSlowTimeScaleEffect, 0.2);
+REGISTER_CHAOS_EFFECT_PARAM(SP02x, ZSlowTimeScaleEffect, 0.2f);
+REGISTER_CHAOS_EFFECT_PARAM(SP5x, ZSlowTimeScaleEffect, 5.0f);
+

@@ -45,10 +45,15 @@ struct EffectRegistrar
  * Register an effect class with the EffectRegistry.
  * Effecs should be registered in the global scope of the Effect's .cpp file.
  * Examples:
- * REGISTER_EFFECT(MySimpleEffect);
- * REGISTER_EFFECT(MyParameterizedEffect, constructor_arg1, constructor_arg2);
+ * REGISTER_CHAOS_EFFECT(MySimpleEffect);
+ * REGISTER_CHAOS_EFFECT_PARAM(MyParameterizedEffect, constructor_arg1, constructor_arg2);
  */
-#define REGISTER_CHAOS_EFFECT(EFFECT_CLASS, ...)                   \
+#define REGISTER_CHAOS_EFFECT(EFFECT_CLASS)                  \
     static EffectRegistrar g_EffectRegistrar_##EFFECT_CLASS( \
-        std::make_unique<EFFECT_CLASS>(__VA_ARGS__)          \
+        std::make_unique<EFFECT_CLASS>()                     \
+    );
+
+#define REGISTER_CHAOS_EFFECT_PARAM(NAME, EFFECT_CLASS, ...)       \
+    static EffectRegistrar g_EffectRegistrar_##EFFECT_CLASS##NAME( \
+        std::make_unique<EFFECT_CLASS>(__VA_ARGS__)                \
     );

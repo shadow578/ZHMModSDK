@@ -15,7 +15,7 @@ void ZLagEffect::Stop()
     m_bEnabled = false;
 }
 
-void ZLagEffect::OnFrameUpdate(const SGameUpdateEvent& p_UpdateEvent, const float32 p_fEffectTimeRemaining)
+void ZLagEffect::OnFrameUpdate(const SGameUpdateEvent &p_UpdateEvent, const float32 p_fEffectTimeRemaining)
 {
     if (!m_bEnabled)
     {
@@ -47,4 +47,4 @@ void ZLagEffect::OnDrawDebugUI()
     ImGui::DragFloat("Target FPS", &m_fTargetFPS, 1.0f, 30.0f);
 }
 
-REGISTER_CHAOS_EFFECT(ZLagEffect, 5.0f)
+REGISTER_CHAOS_EFFECT_PARAM(FPS5, ZLagEffect, 5.0f)
