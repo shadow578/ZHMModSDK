@@ -8,6 +8,12 @@
 namespace Utils
 {
     template <typename T>
+    static T* CastRaw(void* p_pData)
+    {
+        return reinterpret_cast<T*>(p_pData);
+    }
+
+    template <typename T>
     static T GetRandomNumber(const T p_Min, const T p_Max)
     {
         static_assert(std::is_arithmetic<T>::value, "GetRandomNumber only supports arithmetic types.");

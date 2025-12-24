@@ -250,7 +250,7 @@ void ChaosMod::DrawEffectDebugPane()
             const auto s_bCompatibleB = s_pOtherEffect->IsCompatibleWith(m_pEffectForDebug);
 
             Logger::Info(
-                TAG " - with B='{}':\t\t A>B={} \t| B>A={}",
+                TAG " - with B='{}': A>B={} \t| B>A={}",
                 s_sOtherName,
                 s_bCompatibleA ? "Compatible" : "Incompatible",
                 s_bCompatibleB ? "Compatible" : "Incompatible"
