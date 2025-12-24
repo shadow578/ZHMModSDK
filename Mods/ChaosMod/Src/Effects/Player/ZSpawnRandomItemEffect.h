@@ -19,6 +19,7 @@ public:
     void LoadResources() override;
     void Start() override;
     void OnDrawDebugUI() override;
+    void OnClearScene() override;
 
     std::string GetName() override
     {
@@ -38,8 +39,6 @@ public:
 private:
     std::string m_sDisplayName;
     int m_pCount;
-
-    std::vector<std::pair<ZRepositoryID, std::string>> m_aRepositoryProps;
 
     bool SpawnRepositoryPropAt(const ZRepositoryID& p_RepositoryId, const SMatrix s_Transform);
 

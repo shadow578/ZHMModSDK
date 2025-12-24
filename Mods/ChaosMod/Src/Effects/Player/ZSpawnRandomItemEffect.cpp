@@ -13,9 +13,16 @@
 
 #define TAG "[ZSpawnRandomItemEffect] "
 
+static std::vector<std::pair<ZRepositoryID, std::string>> g_aRepositoryProps;
+
 void ZSpawnRandomItemEffect::LoadResources()
 {
     m_bIsAvailable = LoadRepositoryProps();
+}
+
+void ZSpawnRandomItemEffect::OnClearScene()
+{
+    g_aRepositoryProps.clear();
 }
 
 void ZSpawnRandomItemEffect::Start()
@@ -40,7 +47,7 @@ void ZSpawnRandomItemEffect::Start()
                     + s_Forward * Utils::GetRandomNumber(-0.2f, 0.2f)
                     + s_Up * Utils::GetRandomNumber(-0.2f, 0.2f);
 
-                const auto s_Selection = Utils::SelectRandomElement(m_aRepositoryProps);
+                const auto s_Selection = Utils::SelectRandomElement(g_aRepositoryProps);
 
                 Logger::Debug(TAG "spawning item {}", s_Selection.second);
                 if (!SpawnRepositoryPropAt(s_Selection.first, s_WM))
@@ -54,7 +61,7 @@ void ZSpawnRandomItemEffect::Start()
 
 void ZSpawnRandomItemEffect::OnDrawDebugUI()
 {
-    ImGui::TextUnformatted(fmt::format("Repository Props Loaded:", m_aRepositoryProps.size()).c_str());
+    ImGui::TextUnformatted(fmt::format("Repository Props Loaded:", g_aRepositoryProps.size()).c_str());
 }
 
 bool ZSpawnRandomItemEffect::SpawnRepositoryPropAt(const ZRepositoryID& p_RepositoryId, const SMatrix s_Transform)
@@ -128,7 +135,11 @@ bool ZSpawnRandomItemEffect::SpawnRepositoryPropAt(const ZRepositoryID& p_Reposi
 
 bool ZSpawnRandomItemEffect::LoadRepositoryProps()
 {
-    m_aRepositoryProps.clear();
+    if (g_aRepositoryProps.size() > 0)
+    {
+        Logger::Debug(TAG "repository props already loaded, skipping load");
+        return true;
+    }
 
     const auto s_RepoID = ResId<"[assembly:/repository/pro.repo].pc_repo">;
     TResourcePtr<ZTemplateEntityFactory> s_RepositoryResource;
@@ -179,15 +190,15 @@ bool ZSpawnRandomItemEffect::LoadRepositoryProps()
 
             s_sFinalName += " [" + s_sId + "]";
 
-            m_aRepositoryProps.push_back(std::make_pair(
+            g_aRepositoryProps.push_back(std::make_pair(
                 ZRepositoryID(s_sId),
                 s_sFinalName
             ));
         }
     }
 
-    Logger::Debug(TAG "Loaded {} repository items.", m_aRepositoryProps.size());
-    return m_aRepositoryProps.size() > 0;
+    Logger::Debug(TAG "Loaded {} repository items.", g_aRepositoryProps.size());
+    return g_aRepositoryProps.size() > 0;
 }
 
 std::string ZSpawnRandomItemEffect::DynamicObjectToString(const ZDynamicObject& p_DynamicObject)
