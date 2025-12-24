@@ -21,12 +21,7 @@ const std::string c_sGravityPropertyName = "m_vGravity";
 
 const SVector3 c_fDefaultGravity = SVector3(0.f, 0.f, -9.81f);
 
-void ZGravityModifierEffectBase::Start() 
-{
-    SetGravity(m_vGravity);
-}
-
-void ZGravityModifierEffectBase::Stop() 
+void ZGravityModifierEffectBase::RestoreDefaultGravity() 
 {
     SetGravity(c_fDefaultGravity);
 }

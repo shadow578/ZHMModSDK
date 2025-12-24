@@ -10,6 +10,7 @@ public:
     void Start() override;
     void Stop() override;
 
+    std::string GetName() override;
     std::string GetDisplayName() override;
     EDuration GetDuration() override;
 

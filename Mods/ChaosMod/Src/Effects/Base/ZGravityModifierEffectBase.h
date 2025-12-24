@@ -6,14 +6,9 @@
 class ZGravityModifierEffectBase : public IChaosEffect
 {
 public:
-    ZGravityModifierEffectBase(const SVector3 p_vGravity) : m_vGravity(p_vGravity) {}
-    void Start() override;
-    void Stop() override;
-
     bool IsCompatibleWith(const IChaosEffect* p_pOther) const override;
 
-private:
-    const SVector3 m_vGravity;
-
+protected:
+    void RestoreDefaultGravity();
     void SetGravity(const SVector3 p_vGravity);
 };

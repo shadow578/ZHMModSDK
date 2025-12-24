@@ -17,6 +17,11 @@ void ZSlowTimeScaleEffect::Stop()
     Globals::GameTimeManager->m_fTimeMultiplier1 = m_fPreviousTimeScale;
 }
 
+std::string ZSlowTimeScaleEffect::GetName()
+{
+    return IChaosEffect::GetName() + "_" + std::to_string(static_cast<int>(m_fTargetTimeScale*100));
+}
+
 std::string ZSlowTimeScaleEffect::GetDisplayName()
 {
     return fmt::format("{:.1f}x Game Speed", m_fTargetTimeScale);
