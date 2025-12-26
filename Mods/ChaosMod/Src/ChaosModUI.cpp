@@ -160,6 +160,11 @@ void ChaosMod::DrawUnlockersSection()
                 });
         }
 
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip(s_Unlocker->GetDescription().c_str());
+        }
+
         ImGui::EndDisabled();
     }
 }

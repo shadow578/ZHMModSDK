@@ -14,5 +14,6 @@ public:
     virtual bool Available() { return true; }
     
     virtual std::string GetName() const;
-    virtual std::string GetDisplayName() const { return GetName(); }
+    virtual std::string GetDisplayName() const = 0;
+    virtual std::string GetDescription() const = 0;
 };

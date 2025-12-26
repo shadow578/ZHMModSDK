@@ -19,7 +19,7 @@ void ZFixPlayerPositionUnlocker::Start()
         return;
     }
 
-    const auto s_StartingLocation = Utils::SelectRandomElement(s_aStartingLocations);
+    const auto s_StartingLocation = s_aStartingLocations.front();
 
     const auto s_rPosition = s_StartingLocation.GetProperty<TEntityRef<ZSpatialEntity>>("m_rPosition").Get();
     if (!s_rPosition)
