@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "IChaosEffect.h"
+#include "IUnlocker.h"
 #include "Logging.h"
 
 
@@ -12,6 +13,7 @@ class EffectRegistry
 private:
     EffectRegistry() = default;
     std::vector<std::unique_ptr<IChaosEffect>> m_aEffects;
+    std::vector<std::unique_ptr<IUnlocker>> m_aUnlockers;
 
 public:
     static EffectRegistry& GetInstance()
@@ -21,15 +23,26 @@ public:
         return *g_Registry;
     }
 
-    void Register(std::unique_ptr<IChaosEffect> p_Effect)
+    void RegisterEffect(std::unique_ptr<IChaosEffect> p_Effect)
     {
         Logger::Debug("[EffectRegistry] Registered effect '{}'", p_Effect->GetName());
         m_aEffects.push_back(std::move(p_Effect));
     }
 
+    void RegisterUnlocker(std::unique_ptr<IUnlocker> p_Unlocker)
+    {
+        Logger::Debug("[EffectRegistry] Registered unlocker '{}'", p_Unlocker->GetName());
+        m_aUnlockers.push_back(std::move(p_Unlocker));
+    }
+
     const std::vector<std::unique_ptr<IChaosEffect>>& GetEffects() const
     {
         return m_aEffects;
+    }
+
+    const std::vector<std::unique_ptr<IUnlocker>>& GetUnlockers() const
+    {
+        return m_aUnlockers;
     }
 };
 
@@ -37,7 +50,15 @@ struct EffectRegistrar
 {
     explicit EffectRegistrar(std::unique_ptr<IChaosEffect> p_Effect)
     {
-        EffectRegistry::GetInstance().Register(std::move(p_Effect));
+        EffectRegistry::GetInstance().RegisterEffect(std::move(p_Effect));
+    }
+};
+
+struct UnlockerRegistrar
+{
+    explicit UnlockerRegistrar(std::unique_ptr<IUnlocker> p_Unlocker)
+    {
+        EffectRegistry::GetInstance().RegisterUnlocker(std::move(p_Unlocker));
     }
 };
 
@@ -56,4 +77,13 @@ struct EffectRegistrar
 #define REGISTER_CHAOS_EFFECT_PARAM(NAME, EFFECT_CLASS, ...)       \
     static EffectRegistrar g_EffectRegistrar_##EFFECT_CLASS##NAME( \
         std::make_unique<EFFECT_CLASS>(__VA_ARGS__)                \
+    );
+
+/**
+ * Register an unlocker class with the EffectRegistry.
+ * Unlockes are registered similarly to effects.
+ */
+#define REGISTER_CHAOS_UNLOCKER(UNLOCKER_CLASS)                    \
+    static UnlockerRegistrar g_UnlockerRegistrar_##UNLOCKER_CLASS( \
+        std::make_unique<UNLOCKER_CLASS>()                         \
     );

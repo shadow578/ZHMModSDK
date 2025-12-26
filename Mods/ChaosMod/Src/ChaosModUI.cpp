@@ -135,11 +135,33 @@ void ChaosMod::OnDrawUI(const bool p_HasFocus)
         }
 
         ImGui::TextUnformatted(fmt::format("Effects Loaded: {}", EffectRegistry::GetInstance().GetEffects().size()).c_str());
+
+        ImGui::SeparatorText("Unlockers");
+        DrawUnlockersSection();
     }
 
     ImGui::PopFont();
     ImGui::End();
     ImGui::PopFont();
+}
+
+void ChaosMod::DrawUnlockersSection()
+{
+    for (auto& s_Unlocker : EffectRegistry::GetInstance().GetUnlockers())
+    {
+        ImGui::BeginDisabled(!s_Unlocker->Available());
+
+        if (ImGui::Button(s_Unlocker->GetDisplayName().c_str()))
+        {
+            m_qDeferredFrameUpdateActions.push([this, s_Unlocker = s_Unlocker.get()]()
+                {
+                    Logger::Info(TAG "Starting unlocker '{}'", s_Unlocker->GetName());
+                    s_Unlocker->Start();
+                });
+        }
+
+        ImGui::EndDisabled();
+    }
 }
 
 void ChaosMod::DrawDebugWindow()

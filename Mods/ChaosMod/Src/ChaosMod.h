@@ -23,10 +23,13 @@ public:
     void OnDrawMenu() override;
     void OnDrawUI(bool p_HasFocus) override;
 
-private:
+private: // hooks
     DECLARE_PLUGIN_DETOUR(ChaosMod, void, OnLoadScene, ZEntitySceneContext*, SSceneInitParameters&);
     DECLARE_PLUGIN_DETOUR(ChaosMod, void, OnClearScene, ZEntitySceneContext* th, bool p_FullyUnloadScene);
     DECLARE_PLUGIN_DETOUR(ChaosMod, void, OnSetLoadingStage, ZEntitySceneContext* th, ESceneLoadingStage stage);
+
+private: // general UI
+    void DrawUnlockersSection();
 
 private: // misc.
     bool m_bMenuActive = false;
