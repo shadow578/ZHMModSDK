@@ -34,11 +34,6 @@ protected:
 private:
     bool EnsureCameraEntity();
 
-    bool GetRenderDestinationEntity(TEntityRef<IRenderDestinationEntity>& p_RenderDestinationEntity);
-    bool GetActiveCamera(ZEntityRef& p_ActiveCameraEntity);
-    bool SetActiveCamera(ZEntityRef& p_NewCameraEntity);
-    bool IsMainHitmanCamera(ZEntityRef& p_CameraEntity);
-
     bool m_bEffectCameraActive = false;
     ZEntityRef m_EffectCameraEntity;
     ZEntityRef m_OriginalCameraEntity;
