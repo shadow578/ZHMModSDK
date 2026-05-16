@@ -16,7 +16,7 @@ struct EntityTreeNode {
     ZRuntimeResourceID ReferencedBlueprintFactory;
     std::string ReferencedBlueprintFactoryType;
     ZEntityRef Entity;
-    std::multimap<std::string, std::shared_ptr<EntityTreeNode>, EntityNameCompare> Children;
+    std::multimap<std::string, std::shared_ptr<EntityTreeNode>> Children;
     std::vector<std::shared_ptr<EntityTreeNode>> Parents;
     bool IsDynamicEntity;
     std::atomic<bool> IsPendingDeletion = false;
