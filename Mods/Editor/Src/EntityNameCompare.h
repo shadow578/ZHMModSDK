@@ -1,11 +1,28 @@
 #pragma once
 
+#include <cctype>
+#include <string>
+#include <unordered_map>
+
 struct EntityNameCompare {
     struct Parsed {
         std::string m_Base;
         bool m_HasNumber = false;
         int m_Number = 0;
     };
+
+    static const Parsed &GetParsed(const std::string &p_sName) {
+        thread_local std::unordered_map<std::string, Parsed> s_Cache;
+
+        const auto s_It = s_Cache.find(p_sName);
+        if (s_It != s_Cache.end())
+        {
+            return s_It->second;
+        }
+
+        auto s_Result = s_Cache.emplace(p_sName, Parse(p_sName));
+        return s_Result.first->second;
+    }
 
     static std::string StripSuffix(const std::string& p_String) {
         const size_t s_Position = p_String.find(" (");
@@ -37,8 +54,8 @@ struct EntityNameCompare {
     }
 
     bool operator()(const std::string& p_A, const std::string& p_B) const {
-        Parsed s_ParsedA = Parse(p_A);
-        Parsed s_ParsedB = Parse(p_B);
+        const Parsed &s_ParsedA = GetParsed(p_A);
+        const Parsed &s_ParsedB = GetParsed(p_B);
 
         if (s_ParsedA.m_Base == s_ParsedB.m_Base) {
             if (s_ParsedA.m_HasNumber && s_ParsedB.m_HasNumber) {
