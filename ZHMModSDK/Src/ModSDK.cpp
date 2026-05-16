@@ -52,6 +52,37 @@
 #include "Glacier/ZPlayerRegistry.h"
 #include "Glacier/ZServerProxyRoute.h"
 
+
+#include <windows.h>
+#include <stdint.h>
+
+uint64_t ms_since_process_launch()
+{
+    FILETIME create, exit, kernel, user;
+    GetProcessTimes(
+        GetCurrentProcess(),
+        &create,
+        &exit,
+        &kernel,
+        &user
+    );
+
+    FILETIME now_ft;
+    GetSystemTimeAsFileTime(&now_ft);
+
+    ULARGE_INTEGER start, now;
+
+    start.LowPart = create.dwLowDateTime;
+    start.HighPart = create.dwHighDateTime;
+
+    now.LowPart = now_ft.dwLowDateTime;
+    now.HighPart = now_ft.dwHighDateTime;
+
+    // FILETIME = 100ns ticks
+    return (now.QuadPart - start.QuadPart) / 10000;
+}
+
+
 // Needed for TaskDialogIndirect
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
@@ -726,6 +757,9 @@ bool ModSDK::Startup() {
     #if _DEBUG
     m_DebugConsole->StartRedirecting();
     #endif
+
+    const auto s_nStartupMs = ms_since_process_launch();
+    Logger::Debug("Mod SDK Startup called at {} ms since process launch.", s_nStartupMs);
 
     // If there's at least 3 failures, we probably have a problem.
     // Unless the bypass flag is set, show a message and exit.
