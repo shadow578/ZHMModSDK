@@ -20,9 +20,6 @@
 #include <map>
 #include <utility>
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
 class ZClothCharacterEntity;
 class ZLinkedProxyEntity;
 
@@ -731,27 +728,7 @@ void Editor::DrawEntityTree() {
         }
 
         if (ImGui::Button(ICON_MD_CONSTRUCTION " Rebuild entity tree")) {
-            LARGE_INTEGER s_nFrequency = { 0 };
-            LARGE_INTEGER s_nStartTicks = { 0 };
-            QueryPerformanceFrequency(&s_nFrequency);
-            QueryPerformanceCounter(&s_nStartTicks);
-
-            const uint64_t m_nFrequency = s_nFrequency.QuadPart;
-            const uint64_t m_nStartTicks = s_nStartTicks.QuadPart;
-
             UpdateEntities();
-
-            LARGE_INTEGER s_nEndTicksLi = { 0 };
-            QueryPerformanceCounter(&s_nEndTicksLi);
-
-            const uint64_t s_nEndTicks = s_nEndTicksLi.QuadPart;
-            const uint64_t s_nElapsedTicks = s_nEndTicks - m_nStartTicks;
-            const double s_fElapsedMicroseconds = static_cast<double>(s_nElapsedTicks) * 1'000'000.0 / static_cast<double>(m_nFrequency);
-
-            Logger::Debug("Rebuilt entity tree in {:.2f} ms ({} s)",
-                s_fElapsedMicroseconds / 1000.0, 
-                static_cast<int>(s_fElapsedMicroseconds / 1'000'000.0)
-            );
         }
 
         if (!m_EntityIdSearchInput.empty() ||
