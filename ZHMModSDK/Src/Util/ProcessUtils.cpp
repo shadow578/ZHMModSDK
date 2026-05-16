@@ -2,44 +2,64 @@
 
 #include <TlHelp32.h>
 #include <unordered_set>
+#include <cstring>
 
 #include "Logging.h"
 
 using namespace Util;
 
 uintptr_t ProcessUtils::SearchPattern(
-    uintptr_t p_BaseAddress, size_t p_ScanSize, const uint8_t* p_Pattern, const char* p_Mask
+    uintptr_t p_pBaseAddress, size_t p_nScanSize, const uint8_t* p_pPattern, const char* p_szMask
 ) {
-    const size_t s_PatternSize = strlen(p_Mask);
+    const size_t s_PatternSize = strlen(p_szMask);
 
     if (s_PatternSize <= 1) {
         return 0;
     }
 
-    const uintptr_t s_SearchEnd = p_BaseAddress + p_ScanSize - s_PatternSize;
+    if (p_nScanSize < s_PatternSize) {
+        return 0;
+    }
 
-    for (uintptr_t s_SearchAddr = p_BaseAddress; s_SearchAddr <= s_SearchEnd; ++s_SearchAddr) {
-        const uint8_t* s_MemoryPtr = reinterpret_cast<uint8_t*>(s_SearchAddr);
+    if (p_szMask[0] == '?') {
+        return 0;
+    }
 
-        bool s_Found = true;
+    const uint8_t* s_pSearchStart = reinterpret_cast<const uint8_t*>(p_pBaseAddress);
+    const uint8_t* const s_pSearchEnd = s_pSearchStart + p_nScanSize - s_PatternSize;
 
-        for (int i = 0; i < s_PatternSize; ++i) {
-            if (p_Mask[i] == '?') {
-                continue;
-            }
-
-            if (s_MemoryPtr[i] != p_Pattern[i]) {
-                s_Found = false;
-                break;
-            }
+    while (s_pSearchStart <= s_pSearchEnd)
+    {
+        size_t s_nRemainingBytes = static_cast<size_t>(s_pSearchEnd - s_pSearchStart) + 1;
+        const uint8_t* s_pCanidate = static_cast<const uint8_t*>(memchr(s_pSearchStart, p_pPattern[0], s_nRemainingBytes));
+        if (!s_pCanidate) {
+            break;
         }
 
-        if (s_Found) {
-            return s_SearchAddr;
+        if (IsPatternMatch(s_pCanidate, p_pPattern, p_szMask, s_PatternSize)) {
+            return reinterpret_cast<uintptr_t>(s_pCanidate);
         }
+
+        s_pSearchStart = s_pCanidate + 1;
     }
 
     return 0;
+}
+
+bool ProcessUtils::IsPatternMatch(
+    const uint8_t* p_pAddress, const uint8_t* p_pPattern, const char* p_szMask, const size_t p_nPatternSize
+) {
+    for (size_t i = 0; i < p_nPatternSize; ++i) {
+        if (p_szMask[i] == '?') {
+            continue;
+        }
+
+        if (p_pAddress[i] != p_pPattern[i]) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 uint32_t ProcessUtils::GetSizeOfCode(HMODULE p_Module) {
